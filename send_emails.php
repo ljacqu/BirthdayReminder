@@ -7,7 +7,9 @@ require './class/AgeCalculator.php';
 require './class/Mailer.php';
 
 $tomorrow = new DateTime(null, Configuration::getTimeZone());
-$tomorrow->modify('+1 day');
+if (Configuration::MAIL_FOR_TOMORROW) {
+  $tomorrow->modify('+1 day');
+}
 
 $db = new DatabaseConnector();
 
