@@ -302,7 +302,7 @@ class DatabaseConnector {
   }
 
   function getLatestEvents($limit, $offset=null) {
-    $limitQuery = $offset ? "limit $limit, $offset" : "limit $limit";
+    $limitQuery = $offset ? "limit $limit offset $offset" : "limit $limit";
     $query = "select * from br_event order by date desc $limitQuery";
     $stmt = $this->conn->prepare($query);
     $stmt->execute();

@@ -68,10 +68,10 @@ if (empty($events)) {
 if ($offset === -1) {
   echo '<p><a href="?offset=0">See all events</a></p>';
 } else {
-  $prevOffset = $offset - $limit;
+  $prevOffset = max(0, $offset - $limit);
   $nextOffset = !empty($events) ? $offset + $limit : -1;
   echo '<p>';
-  if ($prevOffset >= 0) {
+  if ($prevOffset !== $offset) {
     echo " <a href='?offset=$prevOffset'>Previous</a> ";
   }
   if ($nextOffset > 0) {
