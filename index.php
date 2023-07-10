@@ -14,6 +14,7 @@ if (isset($_GET['logout'])) {
 
 require 'Configuration.php';
 require './class/DatabaseConnector.php';
+require './class/AgeCalculator.php';
 
 $db = new DatabaseConnector();
 if (!$db->birthdayTableExists()) {
@@ -56,19 +57,27 @@ if (isset($_POST['name1'])) {
 }
 
 if (empty($error_rows)) {
-  $entries = $db->findBirthdaysByAccountId($_SESSION['account']);
-  echo '<h2>Your birthdays</h2>';
+
+  $from = new DateTime();
+  $from->modify('-2 days');
+  $entries = $db->findNextBirthdaysForAccountId($_SESSION['account'], $from, 20);
+
+  echo '<h2>Upcoming birthdays</h2>';
   if (empty($entries)) {
     echo "You haven't saved any birthdays.";
   } else {
+    $ageCalculator = new AgeCalculator();
 
-    echo '<table class="bordered"><tr><th>Name</th><th>Date</th><th>&nbsp;</th></tr>';
+    echo '<table class="bordered"><tr><th>Name</th><th>Date</th><th>Age</th><th>&nbsp;</th></tr>';
     $alt = true;
+
     foreach ($entries as $entry) {
       $id = htmlspecialchars($entry['id']);
+
       echo '<tr id="br' . $id . '" ' . ($alt ? 'class="alt"' : '') . '>
        <td>' . htmlspecialchars($entry['name']) . '</td>
-       <td>' . date('d. M. Y', strtotime($entry['date'])) . '</td>
+       <td>' . date('d. M Y', strtotime($entry['date'])) . '</td>
+       <td>' . $ageCalculator->calculateFutureAge($from, $entry['date']) . '</td>
        <td><a href="?" class="delete" data-id="' . htmlspecialchars($entry['id']) . '">Delete</a></td>
       </tr>';
       $alt = !$alt;

@@ -50,7 +50,6 @@ class DatabaseConnector {
   }
 
   function findBirthdaysForWeeklyMail(DateTime $from, DateTime $to, $weekday) {
-
     $from1 = '2020-' . $from->format('m-d');
     $to1   = '2020-' .   $to->format('m-d');
     $from2 = $from1;
@@ -90,8 +89,33 @@ class DatabaseConnector {
     return $stmt->fetch()[0];
   }
 
+  function findNextBirthdaysForAccountId($accountId, DateTime $from, int $limit) {
+    $fromMonth = (int) $from->format('m');
+    $fromDay = (int) $from->format('d');
+
+    $query = "select id, date, name
+              from br_birthday
+              where account_id = :accountId
+              order by case
+                            when (month(date_2020) < :fromMonth OR (month(date_2020) = :fromMonth AND day(date_2020) < :fromDay))
+                            then CONCAT('2024-', LPAD(MONTH(date_2020), 2, '0'), '-', LPAD(DAY(date_2020), 2, '0'))
+                            else date_2020 end,
+                       year(date) desc
+              limit $limit";
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':fromMonth', $fromMonth);
+    $stmt->bindParam(':fromDay',   $fromDay);
+    $stmt->bindParam(':accountId', $accountId);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
   function findBirthdaysByAccountId($accountId) {
-    $query = 'select id, name, date from br_birthday where account_id = :accountId order by date_2020';
+    $query = 'select id, name, date
+              from br_birthday
+              where account_id = :accountId
+              order by date_2020, year(date) desc';
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam('accountId', $accountId);
     $stmt->execute();
