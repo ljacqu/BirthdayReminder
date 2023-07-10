@@ -98,7 +98,7 @@ class DatabaseConnector {
     $fromMonth = (int) $from->format('m');
     $fromDay = (int) $from->format('d');
 
-    $query = "select id, date, name
+    $query = "select id, date, name, flag
               from br_birthday
               where account_id = :accountId
               order by case
@@ -137,6 +137,15 @@ class DatabaseConnector {
     $stmt->bindParam(':name', $name);
     $stmt->bindParam(':date', $dateStr);
     $stmt->bindParam(':date2020', $date2020);
+    $stmt->execute();
+  }
+
+  function updateFlag($accountId, $id, $flag) {
+    $query = 'update br_birthday set flag = :flag where id = :id and account_id = :accountId';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->bindParam(':accountId', $accountId);
+    $stmt->bindParam(':flag', $flag);
     $stmt->execute();
   }
 

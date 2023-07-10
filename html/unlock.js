@@ -1,7 +1,7 @@
-const deleteLinks = document.querySelectorAll('a.unlock');
+const unlockLinks = document.querySelectorAll('a.unlock');
 
 
-deleteLinks.forEach(link => {
+unlockLinks.forEach(link => {
     link.addEventListener('click', event => {
         event.preventDefault();
 

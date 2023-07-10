@@ -64,16 +64,18 @@ if (empty($error_rows)) {
   } else {
     $ageCalculator = new AgeCalculator();
 
-    echo '<table class="bordered"><tr><th>Name</th><th>Date</th><th>Age</th><th>&nbsp;</th></tr>';
+    echo '<table class="bordered"><tr><th>Name</th><th>Date</th><th>Age</th><th>Flag</th><th>&nbsp;</th></tr>';
     $alt = true;
 
     foreach ($entries as $entry) {
       $id = htmlspecialchars($entry['id']);
+      $flagChecked = $entry['flag'] ? 'checked="checked"' : '';
 
       echo '<tr id="br' . $id . '" ' . ($alt ? 'class="alt"' : '') . '>
        <td>' . htmlspecialchars($entry['name']) . '</td>
        <td>' . date($settings['date_format'], strtotime($entry['date'])) . '</td>
        <td>' . $ageCalculator->calculateFutureAge($from, $entry['date']) . '</td>
+       <td><input type="checkbox" class="flag" data-id="' . htmlspecialchars($entry['id']) . '" ' . $flagChecked . ' />
        <td><a href="?" class="delete" data-id="' . htmlspecialchars($entry['id']) . '">Delete</a></td>
       </tr>';
       $alt = !$alt;
@@ -112,4 +114,5 @@ for ($i = 1; $i <= 5; ++$i) {
 </form>
 
 <script type="text/javascript" src="./html/delete.js"></script>
+<script type="text/javascript" src="./html/toggle_flag.js"></script>
 </body></html>

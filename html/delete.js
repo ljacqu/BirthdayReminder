@@ -20,8 +20,7 @@ deleteLinks.forEach(link => {
                 document.getElementById(`br${id}`).remove();
             })
             .catch(error => {
-                // Handle any errors that occur during the request
-                
+                link.innerHTML = 'Error';
             });
         }
     });
