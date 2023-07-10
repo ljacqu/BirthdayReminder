@@ -7,16 +7,19 @@ class Configuration {
   const DB_PASS = '';
   const DB_NAME = 'birthday_reminder';
 
-  private static $instance = null;
+  const MAIL_FROM = 'birthdays@example.org';
+  const MAIL_MODE = 'P'; // S for 'send mails', P for 'print outputs'
+
+  const TIME_ZONE = '';
 
 
   private function __construct() {
   }
 
-  public static function getInstance() {
-    if (self::$instance == null) {
-      self::$instance = new Configuration();
+  static function getTimeZone() {
+    if (self::TIME_ZONE) {
+      return new DateTimeZone(self::TIME_ZONE);
     }
-    return self::$instance;
+    return null;
   }
 }
