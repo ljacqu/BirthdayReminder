@@ -32,14 +32,30 @@ class Mailer {
 
   function sendNextWeekReminder($to, $birthdays, $dateFormat) {
     $now = new DateTime();
-    $listOfNames = array_reduce($birthdays, function ($carry, $bd) use ($now, $dateFormat) {
-      $weekday = $this->ageCalculator->toUpcomingBirthdayYear($now, $bd['date'])->format('l');
-      $date = date($dateFormat, strtotime($bd['date']));
-      $age = $this->ageCalculator->calculateFutureAge($now, $bd['date']);
-      return $carry . "\n- {$bd['name']} (Turns $age on $weekday - $date)";
-    }, '');
 
-    $msg = "Hi!\n\nThese people have their birthday this coming week:\n" . $listOfNames;
+    $birthdaysByDay = [];
+    foreach ($birthdays as $bd) {
+      $birthday = strtotime($bd['date']);
+      $year = date('Y', $birthday);
+      $age = $this->ageCalculator->calculateFutureAge($now, $bd['date']);
+      $text = "\n- {$bd['name']} ($year) turns $age";
+
+      $dayMonth = date('m-d', $birthday);
+      if (!isset($birthdaysByDay[$dayMonth])) {
+        $birthdaysByDay[$dayMonth] = '';
+      }
+      $birthdaysByDay[$dayMonth] .= $text;
+    }
+
+    $output = '';
+    $thisYearPrefix = $now->format('Y-');
+    foreach ($birthdaysByDay as $day => $text) {
+      $date = $this->ageCalculator->toUpcomingBirthdayYear($now, $thisYearPrefix . $day);
+      $weekday = $date->format('l');
+      $output .= "\n\n$weekday, " . $date->format($dateFormat) . $text;
+    }
+
+    $msg = "Hi! These people have their birthday this coming week:\n\n" . trim($output);
 
     $totalBirthdays = count($birthdays);
     $this->sendMail($to, "Next week's birthdays ($totalBirthdays)", $msg);
