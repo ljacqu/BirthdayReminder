@@ -15,20 +15,27 @@ class Mailer {
 
     $msg = "Hi!\n\nTomorrow, the following people have their birthday!\n" . $listOfNames;
 
+    $title = "Birthdays tomorrow";
+    if (strlen($listOfNames) < 40) {
+      // Add names in mail subject if short enough
+      $title .= ": $listOfNames";
+    } else {
+      $title .= " (" . count($birthdays) . ")";
+    }
 
-    $this->sendMail($to, "Tomorrow's birthdays", $msg);
+    $this->sendMail($to, $title, $msg);
   }
 
   function sendNextWeekReminder($to, $birthdays) {
     $listOfNames = array_reduce($birthdays, function ($carry, $bd) {
-      $date = date('d M Y', strtotime($bd['date']));
+      $date = date('l, d M Y', strtotime($bd['date']));
       return $carry . "\n- {$bd['name']} ({$date})";
     }, '');
 
     $msg = "Hi!\n\nThese people have their birthday in the following week:\n" . $listOfNames;
 
-
-    $this->sendMail($to, "Next week's birthdays", $msg);
+    $totalBirthdays = count($birthdays);
+    $this->sendMail($to, "Next week's birthdays ($totalBirthdays)", $msg);
   }
 
   private function sendMail($to, $subject, $message) {

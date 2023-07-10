@@ -68,12 +68,13 @@ echo <<<HTML
 <form method="post" action="settings.php">
   <table>
     <tr>
-      <th>Daily mail</th>
-      <th>Weekly mail</th>
+      <td><label for="daily">Daily mail:</label></td>
+      <td style="text-align: center"><input type="checkbox" id="daily" name="daily" $dailyChecked/></td>
+      
     </tr>
     <tr>
-      <td><input type="checkbox" name="daily" $dailyChecked/></td>
-      <td><select name="weekly">
+      <td><label for="weekly">Weekly mail:</label></td>
+      <td><select id="weekly" name="weekly">
 HTML;
 
 foreach ($weeklyMailOptions as $opt) {
@@ -93,12 +94,12 @@ echo <<<HTML
 <h2>Change password</h2>
 <form method="post" action="settings.php">
 <table>
- <tr><td>Current password:</td>
-     <td><input type="password" name="current" /></td></tr>
- <tr><td>New password:</td>
-     <td><input type="password" name="new" minlength="6" /></td></tr>
- <tr><td>Confirm password:</td>
-     <td><input type="password" name="confirm" minlength="6" /></td></tr>
+ <tr><td><label for="current">Current password:</label></td>
+     <td><input type="password" id="current" name="current" /></td></tr>
+ <tr><td><label for="new">New password:</label></td>
+     <td><input type="password" id="new" name="new" minlength="6" /></td></tr>
+ <tr><td><label for="confirm">Confirm password:</label></td>
+     <td><input type="password" id="confirm" name="confirm" minlength="6" /></td></tr>
  <tr><td colspan="2"><input type="submit" value="Update password" /></td></tr>
 </table>
 </form>

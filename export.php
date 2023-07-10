@@ -37,7 +37,7 @@ Header::outputHeader(true, 'Export');
 ?>
 <h2>Export data</h2>
 You can export all your birthday entries as CSV with the button below.
-
+<p></p>
 <form method="post" action="export.php">
   <input type="hidden" name="export" value="1" />
   <input type="submit" value="Download" />

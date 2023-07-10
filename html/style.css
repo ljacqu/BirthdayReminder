@@ -2,11 +2,44 @@ body {
     font-family: Arial;
     font-size: 10pt;
     color: #000;
+    background-color: #fffff9;
+    padding: 1em 3em;
 }
+h2 {
+    padding-top: 1em;
+    color: #c40;
+    font-size: 1.8em;
+    font-weight: normal;
+}
+input {
+    background-color: #ffeedd;
+}
+input:hover {
+    background-color: #fffecd;
+}
+input[type="text"], input[type="date"], input[type="email"], input[type="password"] {
+    border: 1px solid #999;
+}
+input.error {
+    border: 1px solid #fcc;
+}
+label {
+    font-weight: bold;
+}
+
 table td, table th {
-    border: 1px solid #000;
-    padding: 2px 5pt;
+    padding: 2pt 5pt;
 }
 table {
     border-collapse: collapse;
+}
+table.bordered td, table.bordered th {
+    border: 1px solid #000;
+}
+tr.alt td {
+    background-color: #ffc;
+}
+
+p.navigation {
+    font-weight: bold;
 }

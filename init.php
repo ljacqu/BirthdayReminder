@@ -58,6 +58,7 @@ if (isset($_POST['email'])) {
     $total = rand(1, 3);
     for ($n = 0; $n < $total; ++$n) {
       $name = generateDemoName();
+      $date->setDate(rand(1980, 2020), $date->format('m'), $date->format('d'));
       $db->addBirthday($accountId, $name, $date);
     }
 

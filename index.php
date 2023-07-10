@@ -57,23 +57,30 @@ if (isset($_POST['name1'])) {
 
 if (empty($error_rows)) {
   $entries = $db->findBirthdaysByAccountId($_SESSION['account']);
-  echo '<h2>Your birthdays</h2>
-<table><tr><th>Name</th><th>Date</th><th>&nbsp;</th></tr>';
-  foreach ($entries as $entry) {
-    $id = htmlspecialchars($entry['id']);
-    echo '<tr id="br' . $id . '">
-     <td>' . htmlspecialchars($entry['name']) . '</td>
-     <td>' . date('d. M. Y', strtotime($entry['date'])) . '</td>
-     <td><a href="?" class="delete" data-id="' . htmlspecialchars($entry['id']) . '">Delete</a></td>
-    </tr>';
+  echo '<h2>Your birthdays</h2>';
+  if (empty($entries)) {
+    echo "You haven't saved any birthdays.";
+  } else {
+
+    echo '<table class="bordered"><tr><th>Name</th><th>Date</th><th>&nbsp;</th></tr>';
+    $alt = true;
+    foreach ($entries as $entry) {
+      $id = htmlspecialchars($entry['id']);
+      echo '<tr id="br' . $id . '" ' . ($alt ? 'class="alt"' : '') . '>
+       <td>' . htmlspecialchars($entry['name']) . '</td>
+       <td>' . date('d. M. Y', strtotime($entry['date'])) . '</td>
+       <td><a href="?" class="delete" data-id="' . htmlspecialchars($entry['id']) . '">Delete</a></td>
+      </tr>';
+      $alt = !$alt;
+    }
+    echo '</table>';
   }
-  echo '</table>';
 }
 
 
-// Replace $x in string with a number, $n with name, $d with date, $c for a CSS color
+// Replace $x in string with a number, $n with name, $d with date, $c for a CSS class
 $rowTemplate = '<tr>
-  <td><input type="text" name="name$x" value="$n" style="border-color: $c" /></td>
+  <td><input type="text" name="name$x" value="$n" class="$c" /></td>
   <td><input type="date" name="date$x" value="$d" /></td>
 </tr>';
 
@@ -90,7 +97,7 @@ for ($i = 1; $i <= 5; ++$i) {
       $i,
       htmlspecialchars($form_data['name' . $i] ?? ''),
       htmlspecialchars($form_data['date' . $i] ?? ''),
-      in_array($i, $error_rows, true) ? 'red' : 'black'
+      in_array($i, $error_rows, true) ? 'error' : ''
     ],
     $rowTemplate);
 }

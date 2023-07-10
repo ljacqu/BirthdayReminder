@@ -37,8 +37,12 @@ Header::outputHeader();
 ?>
 <h2>Log in</h2>
 <form method="post" action="login.php">
-  Email: <input type="email" name="email" value="<?php echo htmlspecialchars($email); ?>" />
-  <br />Password: <input type="password" name="password" />
-  <br /><input type="submit" value="Log in" />
+  <table>
+    <tr><td><label for="email">Email:</label></td>
+        <td><input type="email" id="email" name="email" value="<?php echo htmlspecialchars($email); ?>" /></td></tr>
+    <tr><td><label for="password">Password:</label></td>
+        <td><input type="password" id="password" name="password" /></td></tr>
+    <tr><td colspan="2"><input type="submit" value="Log in" /></td></tr>
+  </table>
 </form>
 </body></html>
