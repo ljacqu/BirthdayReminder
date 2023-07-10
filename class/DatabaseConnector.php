@@ -50,19 +50,35 @@ class DatabaseConnector {
   }
 
   function findBirthdaysForWeeklyMail(DateTime $from, DateTime $to, $weekday) {
-    $from2020 = '2020-' . $from->format('m-d');
-    $to2020   = '2020-' .   $to->format('m-d');
+
+    $from1 = '2020-' . $from->format('m-d');
+    $to1   = '2020-' .   $to->format('m-d');
+    $from2 = $from1;
+    $to2   = $to1;
+
+    // If we have something like from1=2020-12-29, to1=2020-01-04, need to use two intervals!
+    if ($from->format('m') === '12' && $to->format('m') === '01') {
+      $to2   = $to1;
+      $to1   = '2020-12-31';
+      $from2 = '2020-01-01';
+    }
 
     $query = 'select account_id, email as account_email, name, date
               from br_birthday
               inner join br_account
                 on br_account.id = br_birthday.account_id
-              where date_2020 between :from and :to
+              where (date_2020 between :from1 and :to1
+                     or date_2020 between :from2 and :to2)
                 and br_account.weekly_mail = :weekday
-              order by account_id, date_2020, date desc';
+              order by case when month(date_2020) < month(:from1) then 1 else 0 end,
+                       month(date_2020),
+                       day(date_2020),
+                       year(date) desc';
     $stmt = $this->conn->prepare($query);
-    $stmt->bindParam(':from', $from2020);
-    $stmt->bindParam(':to', $to2020);
+    $stmt->bindParam(':from1', $from1);
+    $stmt->bindParam(':to1', $to1);
+    $stmt->bindParam(':from2', $from2);
+    $stmt->bindParam(':to2', $to2);
     $stmt->bindParam(':weekday', $weekday);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);

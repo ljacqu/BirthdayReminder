@@ -10,7 +10,7 @@ class AgeCalculator {
     $thenMonth = date('m', $then);
 
     $age = $nowYear - $thenYear;
-    if ($nowMonth === 12 && $thenMonth === 1) {
+    if ($nowMonth === '12' && $thenMonth === '01') {
       return $age + 1;
     }
     return $age;
