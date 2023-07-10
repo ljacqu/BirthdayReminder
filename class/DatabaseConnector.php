@@ -54,7 +54,7 @@ class DatabaseConnector {
   }
 
   function findBirthdaysByAccountId($accountId) {
-    $query = 'select name, date from br_birthday where account_id = :accountId order by date_2020';
+    $query = 'select id, name, date from br_birthday where account_id = :accountId order by date_2020';
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam('accountId', $accountId);
     $stmt->execute();
@@ -71,6 +71,14 @@ class DatabaseConnector {
     $stmt->bindParam(':name', $name);
     $stmt->bindParam(':date', $dateStr);
     $stmt->bindParam(':date2020', $date2020);
+    $stmt->execute();
+  }
+
+  function deleteBirthday($accountId, $id) {
+    $query = 'delete from br_birthday where id = :id and account_id = :accountId';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':accountId', $accountId);
+    $stmt->bindParam(':id', $id);
     $stmt->execute();
   }
 

@@ -15,6 +15,8 @@ if (isset($_GET['logout'])) {
 require 'Configuration.php';
 require './class/DatabaseConnector.php';
 
+require './html/header.html';
+
 $db = new DatabaseConnector();
 
 $form_data = [];
@@ -51,9 +53,14 @@ if (isset($_POST['name1'])) {
 if (empty($error_rows)) {
   $entries = $db->findBirthdaysByAccountId($_SESSION['account']);
   echo '<h2>Your birthdays</h2>
-<table><tr><th>Name</th><th>Date</th></tr>';
+<table><tr><th>Name</th><th>Date</th><th>&nbsp;</th></tr>';
   foreach ($entries as $entry) {
-    echo '<tr><td>' . htmlspecialchars($entry['name']) . '</td><td>' . date('d. M. Y', strtotime($entry['date'])) . '</td></tr>';
+    $id = htmlspecialchars($entry['id']);
+    echo '<tr id="br' . $id . '">
+     <td>' . htmlspecialchars($entry['name']) . '</td>
+     <td>' . date('d. M. Y', strtotime($entry['date'])) . '</td>
+     <td><a href="?" class="delete" data-id="' . htmlspecialchars($entry['id']) . '">Delete</a></td>
+    </tr>';
   }
   echo '</table>';
 }
@@ -92,3 +99,5 @@ for ($i = 1; $i <= 5; ++$i) {
 <p>
   <a href="?logout">Log out</a>
 </p>
+<script type="text/javascript" src="./html/delete.js"></script>
+</body></html>
