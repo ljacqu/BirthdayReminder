@@ -30,15 +30,16 @@ class Mailer {
     $this->sendMail($to, $title, $msg);
   }
 
-  function sendNextWeekReminder($to, $birthdays) {
+  function sendNextWeekReminder($to, $birthdays, $dateFormat) {
     $now = new DateTime();
-    $listOfNames = array_reduce($birthdays, function ($carry, $bd) use ($now) {
-      $date = date('l, d M Y', strtotime($bd['date']));
+    $listOfNames = array_reduce($birthdays, function ($carry, $bd) use ($now, $dateFormat) {
+      $weekday = $this->ageCalculator->toUpcomingBirthdayYear($now, $bd['date'])->format('l');
+      $date = date($dateFormat, strtotime($bd['date']));
       $age = $this->ageCalculator->calculateFutureAge($now, $bd['date']);
-      return $carry . "\n- {$bd['name']} ($date, turns $age)";
+      return $carry . "\n- {$bd['name']} (Turns $age on $weekday - $date)";
     }, '');
 
-    $msg = "Hi!\n\nThese people have their birthday in the following week:\n" . $listOfNames;
+    $msg = "Hi!\n\nThese people have their birthday this coming week:\n" . $listOfNames;
 
     $totalBirthdays = count($birthdays);
     $this->sendMail($to, "Next week's birthdays ($totalBirthdays)", $msg);

@@ -36,7 +36,7 @@ class DatabaseConnector {
   function findBirthdaysForDailyMail(DateTime $date) {
     $date2020 = '2020-' . $date->format('m-d');
 
-    $query = 'select account_id, email as account_email, name, date
+    $query = 'select account_id, name, date
               from br_birthday
               inner join br_account
                 on br_account.id = br_birthday.account_id
@@ -62,7 +62,7 @@ class DatabaseConnector {
       $from2 = '2020-01-01';
     }
 
-    $query = 'select account_id, email as account_email, name, date
+    $query = 'select account_id, name, date
               from br_birthday
               inner join br_account
                 on br_account.id = br_birthday.account_id
@@ -148,7 +148,8 @@ class DatabaseConnector {
    * ************* */
 
   function addAccount($email, $pwdHash, $isAdmin=false) {
-    $query = 'insert into br_account (email, created, password, failed_logins, is_admin, daily_mail, weekly_mail) values (:email, now(), :password, 0, :admin, 1, 0)';
+    $query = "insert into br_account (email, created, password, failed_logins, is_admin, daily_mail, weekly_mail, date_format)
+                              values (:email, now(), :password,             0,   :admin,           1,          0,     'd.m.Y')";
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':email', $email);
     $stmt->bindParam(':password', $pwdHash);
@@ -197,6 +198,24 @@ class DatabaseConnector {
     return EventType::LOGIN_FAILED;
   }
 
+  function getValuesForEmail($accountIds) {
+    $placeholders = implode(',', array_fill(0, count($accountIds), '?'));
+    $query = "select id, email, date_format
+              from br_account
+              where id in ($placeholders)";
+    $stmt = $this->conn->prepare($query);
+    foreach ($accountIds as $k => $v) {
+      $stmt->bindValue($k + 1, $v);
+    }
+    $stmt->execute();
+
+    $results = [];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      $results[$row['id']] = $row;
+    }
+    return $results;
+  }
+
   function updatePassword($id, $passwordHash) {
     $query = 'update br_account set password = :password where id = :id';
     $stmt = $this->conn->prepare($query);
@@ -220,19 +239,20 @@ class DatabaseConnector {
   }
 
   function getPreferences($id) {
-    $query = 'select daily_mail, weekly_mail from br_account where id = :id';
+    $query = 'select daily_mail, weekly_mail, date_format from br_account where id = :id';
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':id', $id);
     $stmt->execute();
     return $stmt->fetch(PDO::FETCH_ASSOC);
   }
 
-  function updatePreferences($id, bool $dailyMail, int $weeklyMail) {
-    $query = 'update br_account set daily_mail = :daily, weekly_mail = :weekly where id = :id';
+  function updatePreferences($id, bool $dailyMail, int $weeklyMail, string $dateFormat) {
+    $query = 'update br_account set daily_mail = :daily, weekly_mail = :weekly, date_format = :dateFormat where id = :id';
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':id', $id);
     $stmt->bindParam(':daily', $dailyMail);
     $stmt->bindParam(':weekly', $weeklyMail);
+    $stmt->bindParam(':dateFormat', $dateFormat);
     $stmt->execute();
   }
 
@@ -273,6 +293,7 @@ class DatabaseConnector {
       is_admin bool not null,
       daily_mail bool not null,
       weekly_mail int not null,
+      date_format varchar(127) not null,
       primary key (id),
       unique (email)
       ) ENGINE = InnoDB');

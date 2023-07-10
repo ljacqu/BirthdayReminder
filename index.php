@@ -61,6 +61,7 @@ if (empty($error_rows)) {
   $from = new DateTime();
   $from->modify('-2 days');
   $entries = $db->findNextBirthdaysForAccountId($_SESSION['account'], $from, 20);
+  $settings = $db->getPreferences($_SESSION['account']);
 
   echo '<h2>Upcoming birthdays</h2>';
   if (empty($entries)) {
@@ -76,7 +77,7 @@ if (empty($error_rows)) {
 
       echo '<tr id="br' . $id . '" ' . ($alt ? 'class="alt"' : '') . '>
        <td>' . htmlspecialchars($entry['name']) . '</td>
-       <td>' . date('d. M Y', strtotime($entry['date'])) . '</td>
+       <td>' . date($settings['date_format'], strtotime($entry['date'])) . '</td>
        <td>' . $ageCalculator->calculateFutureAge($from, $entry['date']) . '</td>
        <td><a href="?" class="delete" data-id="' . htmlspecialchars($entry['id']) . '">Delete</a></td>
       </tr>';

@@ -26,20 +26,22 @@ if ($lastDailyEvent) {
 $upcomingBirthdays = $db->findBirthdaysForDailyMail($tomorrow);
 echo '<br />Found ' . count($upcomingBirthdays) . ' birthdays for tomorrow (date ' . $tomorrow->format('Y-m-d') . ')';
 
-$birthdaysByEmail = groupByAccountEmail($upcomingBirthdays);
-echo '<br />Grouped entries to ' . count($birthdaysByEmail) . ' accounts.';
+$birthdaysByAccountId = groupByAccountId($upcomingBirthdays);
+echo '<br />Grouped entries to ' . count($birthdaysByAccountId) . ' accounts.';
+$emailSettingsByAccountId = $db->getValuesForEmail(array_keys($birthdaysByAccountId));
 
 $mailer = new Mailer(new AgeCalculator());
 
 echo '<br />Sending emails: ';
-foreach ($birthdaysByEmail as $email => $birthdays) {
-  $mailer->sendTomorrowReminder($email, $birthdays);
+foreach ($birthdaysByAccountId as $accountId => $birthdays) {
+  $emailData = $emailSettingsByAccountId[$accountId];
+  $mailer->sendTomorrowReminder($emailData['email'], $birthdays);
   echo '*';
 }
 
 echo ' Done.';
 
-$db->addEvent(EventType::DAILY_MAIL, count($upcomingBirthdays) . ' results; ' . count($birthdaysByEmail) . ' emails');
+$db->addEvent(EventType::DAILY_MAIL, count($upcomingBirthdays) . ' results; ' . count($birthdaysByAccountId) . ' emails');
 
 // Look for weekly birthdays
 $endOfWeek = new DateTime(null, Configuration::getTimeZone());
@@ -48,26 +50,37 @@ $currentWeekDay = date('w');
 $weeklyBirthdays = $db->findBirthdaysForWeeklyMail($tomorrow, $endOfWeek, $currentWeekDay);
 echo '<br />Found ' . count($weeklyBirthdays) . ' birthdays for next week (' . $tomorrow->format('Y-m-d') . ' to ' . $endOfWeek->format('Y-m-d') . ')';
 
-$birthdaysByEmail = groupByAccountEmail($weeklyBirthdays);
-echo '<br />Grouped entries to ' . count($birthdaysByEmail) . ' accounts.';
+$birthdaysByAccountId = groupByAccountId($weeklyBirthdays);
+echo '<br />Grouped entries to ' . count($birthdaysByAccountId) . ' accounts.';
+
+$missingAccountIds = array_diff(array_keys($emailSettingsByAccountId), array_keys($birthdaysByAccountId));
+if (!empty($missingAccountIds)) {
+  $additionalEmailValues = $db->getValuesForEmail($missingAccountIds);
+  foreach ($additionalEmailValues as $accountId => $emailInfo) {
+    $emailSettingsByAccountId[$accountId] = $emailInfo;
+  }
+}
 
 echo '<br />Sending emails: ';
-foreach ($birthdaysByEmail as $email => $birthdays) {
-  $mailer->sendNextWeekReminder($email, $birthdays);
+
+foreach ($birthdaysByAccountId as $accountId => $birthdays) {
+  $emailData = $emailSettingsByAccountId[$accountId];
+  $mailer->sendNextWeekReminder($emailData['email'], $birthdays, $emailData['date_format']);
   echo '*';
 }
 
 echo ' Done.';
-$db->addEvent(EventType::WEEKLY_MAIL, count($weeklyBirthdays) . ' results; ' . count($birthdaysByEmail) . ' emails');
+$db->addEvent(EventType::WEEKLY_MAIL, count($weeklyBirthdays) . ' results; ' . count($birthdaysByAccountId) . ' emails');
 
-function groupByAccountEmail($birthdayEntries) {
-  $birthdaysByEmail = [];
+function groupByAccountId($birthdayEntries) {
+  $birthdaysByAccount = [];
   foreach ($birthdayEntries as $entry) {
-    $email = $entry['account_email'];
-    if (!isset($birthdaysByEmail[$email])) {
-      $birthdaysByEmail[$email] = [];
+    $accountId = $entry['account_id'];
+    if (!isset($birthdaysByAccount[$accountId])) {
+      $birthdaysByAccount[$accountId] = [];
     }
-    $birthdaysByEmail[$email][] = $entry;
+    $birthdaysByAccount[$accountId][] = $entry;
   }
-  return $birthdaysByEmail;
+  return $birthdaysByAccount;
 }
+

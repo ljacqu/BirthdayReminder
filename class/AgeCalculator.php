@@ -15,4 +15,19 @@ class AgeCalculator {
     }
     return $age;
   }
+
+  function toUpcomingBirthdayYear(DateTime $now, string $futureBirthday) {
+    $nowYear   = $now->format('Y');
+    $nowMonth  = $now->format('m');
+    $upcomingBirthday = new DateTime($futureBirthday);
+    $upcomingMonth = $upcomingBirthday->format('m');
+
+    $upcomingYear = $nowYear;
+    if ($nowMonth === '12' && $upcomingMonth === '01') {
+      ++$upcomingYear;
+    }
+    
+    // This seems to also work with leap days
+    return new DateTime($upcomingYear . $upcomingBirthday->format('-m-d'));
+  }
 }

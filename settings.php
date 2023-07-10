@@ -8,6 +8,8 @@ if (!isset($_SESSION['account'])) {
 
 require 'Configuration.php';
 require './model/EventType.php';
+require './class/ValidationException.php';
+require './model/DateFormat.php';
 require './class/DatabaseConnector.php';
 
 $db = new DatabaseConnector();
@@ -35,12 +37,14 @@ $weeklyMailOptions = [
 if (isset($_POST['weekly'])) {
   $newDaily = !!filter_input(INPUT_POST, 'daily', FILTER_VALIDATE_BOOL);
   $newWeekly = (int) filter_input(INPUT_POST, 'weekly', FILTER_VALIDATE_INT);
+  $dateFormat = filter_input(INPUT_POST, 'dateformat', FILTER_UNSAFE_RAW, FILTER_REQUIRE_SCALAR);
 
   if ($newWeekly < -1 || $newWeekly > 6) {
     die('Error: invalid inputs');
   }
+  DateFormat::validateFormat($dateFormat);
 
-  $db->updatePreferences($accountId, $newDaily, $newWeekly);
+  $db->updatePreferences($accountId, $newDaily, $newWeekly, $dateFormat);
   echo '<h2>Settings updated</h2>Thanks! Your preferences have been updated.';
 
 
@@ -70,21 +74,31 @@ echo <<<HTML
     <tr>
       <td><label for="daily">Daily mail:</label></td>
       <td style="text-align: center"><input type="checkbox" id="daily" name="daily" $dailyChecked/></td>
-      
     </tr>
     <tr>
       <td><label for="weekly">Weekly mail:</label></td>
       <td><select id="weekly" name="weekly">
 HTML;
-
-foreach ($weeklyMailOptions as $opt) {
-  $selected = $settings['weekly_mail'] === $opt['value'] ? 'selected="selected"' : '';
-  echo '<option value="' . $opt['value'] . '" ' . $selected . '>' . $opt['label'] . '</option>';
-}
+printOptions($weeklyMailOptions, $settings['weekly_mail']);
 
 echo <<<HTML
       </select></td>
+    </tr>
+    <tr>
+      <td>Date format:</td>
+      <td><select id="dateformat" name="dateformat">
+HTML;
 
+$dateOptions = array_map(function ($opt) {
+  return [
+    'value' => $opt,
+    'label' => date($opt, strtotime('2020-03-14'))
+  ];
+}, DateFormat::getAllFormats());
+printOptions($dateOptions, $settings['date_format']);
+
+echo <<<HTML
+</select></td>
     </tr>
     <tr><td colspan="2"><input type="submit" value="Update settings" /></td></tr>
   </table>
@@ -104,5 +118,13 @@ echo <<<HTML
 </table>
 </form>
 HTML;
+
+function printOptions($options, $selectedValue) {
+  foreach ($options as $opt) {
+    $selected = $selectedValue === $opt['value'] ? 'selected="selected"' : '';
+    echo '<option value="' . $opt['value'] . '" ' . $selected . '>' . $opt['label'] . '</option>';
+  }
+}
+
 ?>
 </body></html>
