@@ -19,6 +19,18 @@ class Mailer {
     $this->sendMail($to, "Tomorrow's birthdays", $msg);
   }
 
+  function sendNextWeekReminder($to, $birthdays) {
+    $listOfNames = array_reduce($birthdays, function ($carry, $bd) {
+      $date = date('d M Y', strtotime($bd['date']));
+      return $carry . "\n- {$bd['name']} ({$date})";
+    }, '');
+
+    $msg = "Hi!\n\nThese people have their birthday in the following week:\n" . $listOfNames;
+
+
+    $this->sendMail($to, "Next week's birthdays", $msg);
+  }
+
   private function sendMail($to, $subject, $message) {
     $actionWasPerformed = false;
     if (strpos(Configuration::MAIL_MODE, 'P') !== false) {

@@ -30,7 +30,23 @@ class DatabaseConnector {
    * Birthdays
    * ************ */
 
-  function findBirthdays(DateTime $from, DateTime $to) {
+  function findBirthdaysForDailyMail(DateTime $date) {
+    $date2020 = '2020-' . $date->format('m-d');
+
+    $query = 'select account_id, email as account_email, name, date
+              from br_birthday
+              inner join br_account
+                on br_account.id = br_birthday.account_id
+              where date_2020 = :date
+                and br_account.daily_mail = true
+              order by account_id, date';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':date', $date2020);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  function findBirthdaysForWeeklyMail(DateTime $from, DateTime $to, $weekday) {
     $from2020 = '2020-' . $from->format('m-d');
     $to2020   = '2020-' .   $to->format('m-d');
 
@@ -39,10 +55,12 @@ class DatabaseConnector {
               inner join br_account
                 on br_account.id = br_birthday.account_id
               where date_2020 between :from and :to
+                and br_account.weekly_mail = :weekday
               order by account_id, date';
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':from', $from2020);
     $stmt->bindParam(':to', $to2020);
+    $stmt->bindParam(':weekday', $weekday);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
@@ -87,7 +105,7 @@ class DatabaseConnector {
    * ************* */
 
   function addAccount($email, $pwdHash, $isAdmin=false) {
-    $query = 'insert into br_account (email, created, password, failed_logins, is_admin) values (:email, now(), :password, 0, :admin)';
+    $query = 'insert into br_account (email, created, password, failed_logins, is_admin, daily_mail, weekly_mail) values (:email, now(), :password, 0, :admin, 1, 0)';
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':email', $email);
     $stmt->bindParam(':password', $pwdHash);

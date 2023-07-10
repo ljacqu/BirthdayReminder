@@ -21,19 +21,11 @@ if ($lastDailyEvent) {
   }
 }
 
+// Look for tomorrow's birthdays
+$upcomingBirthdays = $db->findBirthdaysForDailyMail($tomorrow);
+echo '<br />Found ' . count($upcomingBirthdays) . ' birthdays for tomorrow (date ' . $tomorrow->format('Y-m-d') . ')';
 
-$upcomingBirthdays = $db->findBirthdays($tomorrow, $tomorrow);
-echo '<br />Found ' . count($upcomingBirthdays) . ' upcoming birthdays (date ' . $tomorrow->format('Y-m-d') . ')';
-
-$birthdaysByEmail = [];
-
-foreach ($upcomingBirthdays as $entry) {
-  $email = $entry['account_email'];
-  if (!isset($birthdaysByEmail[$email])) {
-    $birthdaysByEmail[$email] = [];
-  }
-  $birthdaysByEmail[$email][] = $entry;
-}
+$birthdaysByEmail = groupByAccountEmail($upcomingBirthdays);
 echo '<br />Grouped entries to ' . count($birthdaysByEmail) . ' accounts.';
 
 $mailer = new Mailer();
@@ -47,3 +39,34 @@ foreach ($birthdaysByEmail as $email => $birthdays) {
 echo ' Done.';
 
 $db->addEvent(EventType::DAILY_MAIL, count($upcomingBirthdays) . ' results; ' . count($birthdaysByEmail) . ' emails');
+
+// Look for weekly birthdays
+$endOfWeek = new DateTime(null, Configuration::getTimeZone());
+$endOfWeek->modify('+7 day');
+$currentWeekDay = date('w');
+$weeklyBirthdays = $db->findBirthdaysForWeeklyMail($tomorrow, $endOfWeek, $currentWeekDay);
+echo '<br />Found ' . count($weeklyBirthdays) . ' birthdays for next week (' . $tomorrow->format('Y-m-d') . ' to ' . $endOfWeek->format('Y-m-d') . ')';
+
+$birthdaysByEmail = groupByAccountEmail($weeklyBirthdays);
+echo '<br />Grouped entries to ' . count($birthdaysByEmail) . ' accounts.';
+
+echo '<br />Sending emails: ';
+foreach ($birthdaysByEmail as $email => $birthdays) {
+  $mailer->sendNextWeekReminder($email, $birthdays);
+  echo '*';
+}
+
+echo ' Done.';
+$db->addEvent(EventType::WEEKLY_MAIL, count($weeklyBirthdays) . ' results; ' . count($birthdaysByEmail) . ' emails');
+
+function groupByAccountEmail($birthdayEntries) {
+  $birthdaysByEmail = [];
+  foreach ($birthdayEntries as $entry) {
+    $email = $entry['account_email'];
+    if (!isset($birthdaysByEmail[$email])) {
+      $birthdaysByEmail[$email] = [];
+    }
+    $birthdaysByEmail[$email][] = $entry;
+  }
+  return $birthdaysByEmail;
+}
