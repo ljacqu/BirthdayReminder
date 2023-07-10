@@ -9,6 +9,7 @@ final class Header {
     $links = [
       ['page' => 'index.php', 'label' => 'Main'],
       ['page' => 'settings.php', 'label' => 'Settings'],
+      ['page' => 'export.php', 'label' => 'Export'],
       ['page' => 'index.php?logout', 'label' => 'Log out']
     ];
 
