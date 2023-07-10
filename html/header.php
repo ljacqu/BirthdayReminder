@@ -10,7 +10,7 @@ final class Header {
       ['page' => 'index.php', 'label' => 'Main'],
       ['page' => 'settings.php', 'label' => 'Settings'],
       ['page' => 'export.php', 'label' => 'Export'],
-      ['page' => 'index.php?logout', 'label' => 'Log out']
+      ['page' => 'logout.php', 'label' => 'Log out']
     ];
     if ($accountInfo && $accountInfo['is_admin']) {
       array_unshift($links, ['page' => 'system.php', 'label' => 'System']);

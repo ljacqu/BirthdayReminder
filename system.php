@@ -13,6 +13,11 @@ require './class/DatabaseConnector.php';
 require './class/AccountService.php';
 
 $db = new DatabaseConnector();
+if (!$db->birthdayTableExists()) {
+  header('Location: init.php');
+  exit;
+}
+
 $accountInfo = $db->getValuesForSession($_SESSION['account']);
 
 if (!$accountInfo || !$accountInfo['is_admin']) {

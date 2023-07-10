@@ -6,12 +6,6 @@ if (!isset($_SESSION['account'])) {
   exit;
 }
 
-if (isset($_GET['logout'])) {
-  session_destroy();
-  header('Location: login.php');
-  exit;
-}
-
 require 'Configuration.php';
 require './class/DatabaseConnector.php';
 require './class/AgeCalculator.php';
