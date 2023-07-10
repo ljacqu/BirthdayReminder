@@ -20,8 +20,9 @@ if (!$db->birthdayTableExists()) {
   exit;
 }
 
+$accountInfo = $db->getValuesForSession($_SESSION['account']);
 require './html/header.php';
-Header::outputHeader(true, 'Settings');
+Header::outputHeader(true, 'Settings', $accountInfo);
 
 $weeklyMailOptions = [
   ['value' => '-1', 'label' => 'Disabled'],

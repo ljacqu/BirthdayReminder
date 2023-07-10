@@ -12,6 +12,7 @@ require './class/DatabaseConnector.php';
 
 $db = new DatabaseConnector();
 $accountId = $_SESSION['account'];
+$accountInfo = $db->getValuesForSession($_SESSION['account']);
 
 if (!$db->birthdayTableExists()) {
   header('Location: init.php');
@@ -33,7 +34,7 @@ if (isset($_POST['export'])) {
 }
 
 require './html/header.php';
-Header::outputHeader(true, 'Export');
+Header::outputHeader(true, 'Export', $accountInfo);
 ?>
 <h2>Export data</h2>
 You can export all your birthday entries as CSV with the button below.

@@ -37,6 +37,17 @@ class AccountService {
     $this->db->addAccount($emailInput, $this->hashPassword($passwordInput), true);
   }
 
+  function registerUser($email, $password) {
+    if (!$email || strpos($email, '@') === false) {
+      throw new ValidationException('Please provide an email');
+    } else if ($this->db->findAccountIdByEmail($email)) {
+      throw new ValidationException('The email is already in use');
+    }
+    $this->validatePassword($password);
+
+    $this->db->addAccount($email, $this->hashPassword($password), false);
+  }
+
   function handlePasswordChange($accountId, $currentPwd, $newPwd, $confirmPwd) {
     if (!$newPwd || strlen($newPwd) < self::MIN_PASS_LENGTH) {
       return 'Please provide a new password with at least ' . self::MIN_PASS_LENGTH . ' characters';

@@ -21,9 +21,10 @@ if (!$db->birthdayTableExists()) {
   header('Location: init.php');
   exit;
 }
+$accountInfo = $db->getValuesForSession($_SESSION['account']);
 
 require './html/header.php';
-Header::outputHeader(true, 'Main');
+Header::outputHeader(true, 'Main', $accountInfo);
 
 $form_data = [];
 $error_rows = [];

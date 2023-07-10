@@ -5,13 +5,16 @@ final class Header {
   private function __construct() {
   }
 
-  static function outputHeader($showLinks=false, $currentPage=null) {
+  static function outputHeader($showLinks=false, $currentPage=null, $accountInfo=null) {
     $links = [
       ['page' => 'index.php', 'label' => 'Main'],
       ['page' => 'settings.php', 'label' => 'Settings'],
       ['page' => 'export.php', 'label' => 'Export'],
       ['page' => 'index.php?logout', 'label' => 'Log out']
     ];
+    if ($accountInfo && $accountInfo['is_admin']) {
+      array_unshift($links, ['page' => 'system.php', 'label' => 'System']);
+    }
 
     echo '<!DOCTYPE html>
 <html lang="en">

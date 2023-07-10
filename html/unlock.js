@@ -1,27 +1,26 @@
-const deleteLinks = document.querySelectorAll('a.delete');
+const deleteLinks = document.querySelectorAll('a.unlock');
 
 
 deleteLinks.forEach(link => {
     link.addEventListener('click', event => {
         event.preventDefault();
 
-        const confirmed = confirm('Are you sure you want to delete this entry?');
+        const confirmed = confirm('Unlock the user? This will set the number of failed login attempts back to zero.');
 
         if (confirmed) {
             const id = link.dataset.id;
             const formData = new FormData();
-            formData.append('id', id);
+            formData.append('unlock', id);
 
-            fetch('delete.php', {
+            fetch('system.php', {
                 method: 'POST',
                 body: formData
             })
             .then(response => {
-                document.getElementById(`br${id}`).remove();
+                    link.parentElement.innerText = 'Unlocked';
             })
             .catch(error => {
-                // Handle any errors that occur during the request
-                
+                    link.parentElement.innerText = 'Error';
             });
         }
     });

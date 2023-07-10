@@ -2,6 +2,8 @@
 
 class DatabaseConnector {
 
+  const MAX_FAILED_LOGINS = 10;
+
   private $conn;
   private $name;
 
@@ -147,7 +149,7 @@ class DatabaseConnector {
    * Accounts
    * ************* */
 
-  function addAccount($email, $pwdHash, $isAdmin=false) {
+  function addAccount($email, $pwdHash, $isAdmin) {
     $query = "insert into br_account (email, created, password, failed_logins, is_admin, daily_mail, weekly_mail, date_format)
                               values (:email, now(), :password,             0,   :admin,           1,          0,     'd.m.Y')";
     $stmt = $this->conn->prepare($query);
@@ -189,7 +191,7 @@ class DatabaseConnector {
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($result) {
-      if ($result['failed_logins'] >= 10) {
+      if ($result['failed_logins'] >= self::MAX_FAILED_LOGINS) {
         return EventType::LOGIN_LOCKED;
       } else if (password_verify($pass, $result['password'])) {
         return EventType::LOGIN_SUCCESS;
@@ -256,6 +258,28 @@ class DatabaseConnector {
     $stmt->execute();
   }
 
+  function getValuesForSession($accountId) {
+    $query = 'select is_admin from br_account where id = :id';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':id', $accountId);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+  }
+
+  function getAllAccountOverviews() {
+    $query = 'select id, email, last_login, failed_logins, created, is_admin from br_account order by id';
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  function resetFailedLoginAttempts($accountId) {
+    $query = 'update br_account set failed_logins = 0 where id = :id';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':id', $accountId);
+    $stmt->execute();
+  }
+
   /* *************
    * Events
    * ************* */
@@ -277,6 +301,14 @@ class DatabaseConnector {
     $stmt->execute();
   }
 
+  function getLatestEvents($limit, $offset=null) {
+    $limitQuery = $offset ? "limit $limit, $offset" : "limit $limit";
+    $query = "select * from br_event order by date desc $limitQuery";
+    $stmt = $this->conn->prepare($query);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
   /* ***********
    * Internal
    * *********** */
@@ -286,7 +318,7 @@ class DatabaseConnector {
     $this->conn->exec('create table br_account (
       id int auto_increment,
       email varchar(255) not null,
-      created date not null,
+      created timestamp not null,
       password varchar(255) not null,
       failed_logins int not null,
       last_login timestamp,
