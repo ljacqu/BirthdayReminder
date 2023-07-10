@@ -18,12 +18,15 @@ class DatabaseConnector {
    * ************** */
 
   function initTablesIfNeeded() {
-    $stmt = $this->conn->query('select exists
-(select table_name from information_schema.TABLES where table_schema = "' . $this->name . '" and table_name = "br_birthday");');
-    $tableExists = $stmt->fetch()[0];
-    if (!$tableExists) {
+    if (!$this->birthdayTableExists()) {
       $this->createTables();
     }
+  }
+
+  function birthdayTableExists() {
+    $stmt = $this->conn->query('select exists
+(select table_name from information_schema.TABLES where table_schema = "' . $this->name . '" and table_name = "br_birthday");');
+    return $stmt->fetch()[0];
   }
 
   /* ************

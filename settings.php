@@ -10,10 +10,16 @@ require 'Configuration.php';
 require './model/EventType.php';
 require './class/DatabaseConnector.php';
 
-require './html/header.html';
-
 $db = new DatabaseConnector();
 $accountId = $_SESSION['account'];
+
+if (!$db->birthdayTableExists()) {
+  header('Location: init.php');
+  exit;
+}
+
+require './html/header.php';
+Header::outputHeader(true, 'Settings');
 
 $weeklyMailOptions = [
   ['value' => '-1', 'label' => 'Disabled'],

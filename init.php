@@ -4,6 +4,9 @@ require 'Configuration.php';
 require './class/DatabaseConnector.php';
 require './class/ValidationException.php';
 require './class/AccountService.php';
+require './html/header.php';
+
+Header::outputHeader();
 
 $db = new DatabaseConnector();
 $db->initTablesIfNeeded();
@@ -12,7 +15,7 @@ $hasAccount = $db->hasAnyAccount();
 if (isset($_POST['email'])) {
 
   if ($hasAccount) {
-    die('An account already exists!');
+    die('Error: an account already exists! <a href="index.php">Main page</a>');
   }
 
   try {
@@ -23,8 +26,8 @@ if (isset($_POST['email'])) {
     $accountService->registerInitialAdmin($email, $password);
 
     echo '<h2>Registration successful</h2>';
-    echo 'Your account has been registered. Please consider deleting this file now.';
-    echo '<br /><a href="index.php">Main page</a>';
+    echo 'Your account has been registered. You can delete this file now if you like.';
+    echo '<br /><a href="index.php">Main page</a> &middot; <a href="?demodata">Create demo data</a>';
   } catch (ValidationException $e) {
     echo '<h2>Error</h2>';
     echo 'The account could not be registered: ' . $e->getMessage() . '.';
@@ -35,9 +38,9 @@ if (isset($_POST['email'])) {
 } else if (isset($_GET['demodata'])) {
 
   if (!$hasAccount) {
-    die('Please create an account first.<br /><a href="init.php">Initialization page</a>');
+    die('Error: please create an account first.<br /><a href="init.php">Initialization page</a>');
   } else if ($db->hasAnyBirthday()) {
-    die('Cannot create demo birthdays: table is not empty');
+    die('Error: cannot create demo data. You already have entries! <a href="index.php">Main page</a>');
   }
 
   $accountId = $db->fetchMinAccountId();
@@ -60,23 +63,24 @@ if (isset($_POST['email'])) {
 
     $date->modify('+1 day');
   }
-  echo 'Successfully created demo birthdays! <a href="index.php">Main</a>';
+  echo 'Successfully created demo entries! <a href="index.php">Main page</a>';
 
 } else {
 
   if (!$hasAccount) {
     echo <<<HTML
 <h2>Define initial admin account</h2>
+Welcome to the <em>Birthday Reminder</em> setup! Please create a user to administer the system.
 <form method="post">
 Email: <input type="email" name="email" value="admin@example.org" />
-<br />Password: <input type="password" name="password" value="birthday" />
+<br />Password: <input type="password" name="password" value="birthday" minlength="6" />
 <br /><input type="submit" value="Register" />
 </form>
 HTML;
   } else {
     echo <<<HTML
 <h2>You're all set!</h2>
-You may want to delete this file.
+You've already created an initial user. Go to the main page to log in with that user. You can now delete this file.
 <br /><a href="index.php">Main page</a> &middot; <a href="?demodata">Create demo data</a>
 HTML;
   }

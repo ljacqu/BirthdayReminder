@@ -2,22 +2,27 @@
 session_start();
 
 if (!isset($_SESSION['account'])) {
-  header('Location:login.php');
+  header('Location: login.php');
   exit;
 }
 
 if (isset($_GET['logout'])) {
   session_destroy();
-  header('Location:login.php');
+  header('Location: login.php');
   exit;
 }
 
 require 'Configuration.php';
 require './class/DatabaseConnector.php';
 
-require './html/header.html';
-
 $db = new DatabaseConnector();
+if (!$db->birthdayTableExists()) {
+  header('Location: init.php');
+  exit;
+}
+
+require './html/header.php';
+Header::outputHeader(true, 'Main');
 
 $form_data = [];
 $error_rows = [];
