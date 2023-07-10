@@ -53,6 +53,14 @@ class DatabaseConnector {
     return $stmt->fetch()[0];
   }
 
+  function findBirthdaysByAccountId($accountId) {
+    $query = 'select name, date from br_birthday where account_id = :accountId order by date_2020';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam('accountId', $accountId);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
   function addBirthday($accountId, $name, DateTime $date) {
     $dateStr = $date->format('Y-m-d');
     $date2020 = '2020-' . $date->format('m-d');
