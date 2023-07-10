@@ -150,6 +150,23 @@ class DatabaseConnector {
     $stmt->execute();
   }
 
+  function getPreferences($id) {
+    $query = 'select daily_mail, weekly_mail from br_account where id = :id';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+  }
+
+  function updatePreferences($id, bool $dailyMail, int $weeklyMail) {
+    $query = 'update br_account set daily_mail = :daily, weekly_mail = :weekly where id = :id';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->bindParam(':daily', $dailyMail);
+    $stmt->bindParam(':weekly', $weeklyMail);
+    $stmt->execute();
+  }
+
   /* *************
    * Events
    * ************* */
@@ -185,6 +202,8 @@ class DatabaseConnector {
       failed_logins int not null,
       last_login timestamp,
       is_admin bool not null,
+      daily_mail bool not null,
+      weekly_mail int not null,
       primary key (id),
       unique (email)
       ) ENGINE = InnoDB');

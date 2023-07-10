@@ -14,7 +14,7 @@ if (!isset($_POST['id'])) {
 require 'Configuration.php';
 require './class/DatabaseConnector.php';
 
-$birthdayId = filter_input(INPUT_POST, 'id', FILTER_UNSAFE_RAW, FILTER_REQUIRE_SCALAR);
+$birthdayId = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 if ($birthdayId) {
   $db = new DatabaseConnector();
   $db->deleteBirthday($_SESSION['account'], $birthdayId);

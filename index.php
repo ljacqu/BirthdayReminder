@@ -92,12 +92,7 @@ for ($i = 1; $i <= 5; ++$i) {
     ?>
   <tr><td colspan="2"><input type="submit" value="Add entries" /></td></tr>
   </table>
-
 </form>
 
-
-<p>
-  <a href="?logout">Log out</a>
-</p>
 <script type="text/javascript" src="./html/delete.js"></script>
 </body></html>
