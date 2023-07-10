@@ -3,6 +3,7 @@
 require 'Configuration.php';
 require './model/EventType.php';
 require './class/DatabaseConnector.php';
+require './class/AgeCalculator.php';
 require './class/Mailer.php';
 
 $tomorrow = new DateTime(null, Configuration::getTimeZone());
@@ -28,7 +29,7 @@ echo '<br />Found ' . count($upcomingBirthdays) . ' birthdays for tomorrow (date
 $birthdaysByEmail = groupByAccountEmail($upcomingBirthdays);
 echo '<br />Grouped entries to ' . count($birthdaysByEmail) . ' accounts.';
 
-$mailer = new Mailer();
+$mailer = new Mailer(new AgeCalculator());
 
 echo '<br />Sending emails: ';
 foreach ($birthdaysByEmail as $email => $birthdays) {

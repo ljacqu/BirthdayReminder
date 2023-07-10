@@ -2,15 +2,19 @@
 
 class Mailer {
 
-  private $fromAddr;
+  private string $fromAddr;
+  private AgeCalculator $ageCalculator;
 
-  function __construct() {
+  function __construct(AgeCalculator $ageCalculator) {
     $this->fromAddr = Configuration::MAIL_FROM;
+    $this->ageCalculator = $ageCalculator;
   }
 
   function sendTomorrowReminder($to, $birthdays) {
-    $listOfNames = array_reduce($birthdays, function ($carry, $bd) {
-      return $carry . "\n- " . $bd['name'];
+    $now = new DateTime();
+    $listOfNames = array_reduce($birthdays, function ($carry, $bd) use ($now) {
+      $age = $this->ageCalculator->calculateFutureAge($now, $bd['date']);
+      return $carry . "\n- " . $bd['name'] . " (turns $age)";
     }, '');
 
     $msg = "Hi!\n\nTomorrow, the following people have their birthday!\n" . $listOfNames;
@@ -27,9 +31,11 @@ class Mailer {
   }
 
   function sendNextWeekReminder($to, $birthdays) {
-    $listOfNames = array_reduce($birthdays, function ($carry, $bd) {
+    $now = new DateTime();
+    $listOfNames = array_reduce($birthdays, function ($carry, $bd) use ($now) {
       $date = date('l, d M Y', strtotime($bd['date']));
-      return $carry . "\n- {$bd['name']} ({$date})";
+      $age = $this->ageCalculator->calculateFutureAge($now, $bd['date']);
+      return $carry . "\n- {$bd['name']} ($date, turns $age)";
     }, '');
 
     $msg = "Hi!\n\nThese people have their birthday in the following week:\n" . $listOfNames;

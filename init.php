@@ -71,11 +71,13 @@ if (isset($_POST['email'])) {
   if (!$hasAccount) {
     echo <<<HTML
 <h2>Define initial admin account</h2>
-Welcome to the <em>Birthday Reminder</em> setup! Please create a user to administer the system.
+<p>Welcome to the <em>Birthday Reminder</em> setup! Please create a user to administer the system.</p>
 <form method="post">
-Email: <input type="email" name="email" value="admin@example.org" />
-<br />Password: <input type="password" name="password" value="birthday" minlength="6" />
-<br /><input type="submit" value="Register" />
+<table>
+<tr><td>Email:</td><td><input type="email" name="email" value="admin@example.org" /></td></tr>
+<tr><td>Password:</td><td><input type="password" name="password" value="birthday" minlength="6" /></td></tr>
+<tr><td><input type="submit" value="Register" /></td></tr>
+</table>
 </form>
 HTML;
   } else {
@@ -96,3 +98,5 @@ function generateDemoName() {
   $last = $lastNames[rand(0, count($lastNames) - 1)];
   return $first . ' ' . $last;
 }
+?>
+</body></html>

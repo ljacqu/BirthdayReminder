@@ -42,7 +42,7 @@ class DatabaseConnector {
                 on br_account.id = br_birthday.account_id
               where date_2020 = :date
                 and br_account.daily_mail = true
-              order by account_id, date';
+              order by account_id, date_2020, date desc';
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':date', $date2020);
     $stmt->execute();
@@ -59,7 +59,7 @@ class DatabaseConnector {
                 on br_account.id = br_birthday.account_id
               where date_2020 between :from and :to
                 and br_account.weekly_mail = :weekday
-              order by account_id, date';
+              order by account_id, date_2020, date desc';
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':from', $from2020);
     $stmt->bindParam(':to', $to2020);
