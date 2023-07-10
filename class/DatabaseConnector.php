@@ -50,6 +50,18 @@ class DatabaseConnector {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
+  function addBirthday($accountId, $name, DateTime $date) {
+    $date2020 = '2020-' . $date->format('m-d');
+
+    $query = 'insert into br_birthday (account_id, name, date, date_2020) values (:accountId, :name, :date, :date2020)';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':accountId', $accountId);
+    $stmt->bindParam(':name', $name);
+    $stmt->bindParam(':date', $date);
+    $stmt->bindParam(':date2020', $date2020);
+    $stmt->execute();
+  }
+
   /* *************
    * Accounts
    * ************* */
@@ -69,6 +81,49 @@ class DatabaseConnector {
     return (bool) $stmt->fetchColumn();
   }
 
+  function findAccountIdByEmail($email) {
+    $query = 'select id from br_account where email = :email';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':email', $email);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($result) {
+      return $result['id'];
+    }
+    return null;
+  }
+
+  function verifyPassword($id, $pass) {
+    $query = 'select password, failed_logins from br_account where id = :id';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->execute();
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($result) {
+      if ($result['failed_logins'] >= 10) {
+        return EventType::LOGIN_LOCKED;
+      } else if (password_verify($pass, $result['password'])) {
+        return EventType::LOGIN_SUCCESS;
+      }
+    }
+    return EventType::LOGIN_FAILED;
+  }
+
+  function updateForSuccessfulAuth($id) {
+    $query = 'update br_account set last_login = now(), failed_logins = 0 where id = :id';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->execute();
+  }
+
+  function updateForFailedAuth($id) {
+    $query = 'update br_account set failed_logins = failed_logins + 1 where id = :id';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->execute();
+  }
+
   /* *************
    * Events
    * ************* */
@@ -81,11 +136,12 @@ class DatabaseConnector {
     return $stmt->fetch();
   }
 
-  function addEvent($type, $info) {
-    $query = 'insert into br_event (type, date, info) values (:type, now(), :info)';
+  function addEvent($type, $info, $accountId=null) {
+    $query = 'insert into br_event (type, date, info, account_id) values (:type, now(), :info, :account)';
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':type', $type);
     $stmt->bindParam(':info', $info);
+    $stmt->bindParam(':account', $accountId);
     $stmt->execute();
   }
 

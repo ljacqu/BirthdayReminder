@@ -10,6 +10,24 @@ class AccountService {
     $this->db = $db;
   }
 
+  function handleLogin($email, $password) {
+    $id = $this->db->findAccountIdByEmail($email);
+    if ($id) {
+      $loginEvent = $this->db->verifyPassword($id, $password);
+      $this->db->addEvent($loginEvent, $_SERVER['REMOTE_ADDR'], $id);
+
+      if ($loginEvent === EventType::LOGIN_SUCCESS) {
+        $this->db->updateForSuccessfulAuth($id);
+        return $id;
+      } else {
+        $this->db->updateForFailedAuth($id);
+      }
+    } else {
+      $this->db->addEvent(EventType::LOGIN_FAILED, $_SERVER['REMOTE_ADDR']);
+    }
+    return null;
+  }
+
   function registerInitialAdmin($emailInput, $passwordInput) {
     if (!$emailInput || strpos($emailInput, '@') === false) {
       throw new ValidationException('Please provide an email');
