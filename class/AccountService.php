@@ -37,6 +37,27 @@ class AccountService {
     $this->db->addAccount($emailInput, $this->hashPassword($passwordInput), true);
   }
 
+  function handlePasswordChange($accountId, $currentPwd, $newPwd, $confirmPwd) {
+    if (!$newPwd || strlen($newPwd) < self::MIN_PASS_LENGTH) {
+      return 'Please provide a new password with at least ' . self::MIN_PASS_LENGTH . ' characters';
+    } else if ($newPwd !== $confirmPwd) {
+      return 'The new password and the confirmation did not match';
+    } else {
+      $currentPwdResult = $this->db->verifyPassword($accountId, $currentPwd);
+      if ($currentPwdResult === EventType::LOGIN_LOCKED) {
+        // Should never happen
+        return 'Your account is locked. Please contact an administrator';
+      } else if ($currentPwdResult !== EventType::LOGIN_SUCCESS) {
+        return 'The current password was not correct';
+      }
+    }
+
+    $newHash = $this->hashPassword($newPwd);
+    $this->db->updatePassword($accountId, $newHash);
+    $this->db->addEvent(EventType::PASSWORD_CHANGE, $_SERVER['REMOTE_ADDR'], $accountId);
+    return true;
+  }
+
   private function hashPassword($pwd) {
     return password_hash($pwd, PASSWORD_DEFAULT);
   }

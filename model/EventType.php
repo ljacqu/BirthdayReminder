@@ -9,4 +9,6 @@ class EventType {
   const LOGIN_FAILED = 'login.failed';
   const LOGIN_LOCKED = 'login.locked';
 
+  const PASSWORD_CHANGE = 'account.pwdChange';
+
 }

@@ -7,6 +7,7 @@ if (!isset($_SESSION['account'])) {
 }
 
 require 'Configuration.php';
+require './model/EventType.php';
 require './class/DatabaseConnector.php';
 
 require './html/header.html';
@@ -35,6 +36,22 @@ if (isset($_POST['weekly'])) {
 
   $db->updatePreferences($accountId, $newDaily, $newWeekly);
   echo '<h2>Settings updated</h2>Thanks! Your preferences have been updated.';
+
+
+} else if (isset($_POST['current'])) { // password change
+  require './class/AccountService.php';
+  $accountService = new AccountService($db);
+
+  $currentPwd = filter_input(INPUT_POST, 'current', FILTER_UNSAFE_RAW, FILTER_REQUIRE_SCALAR);
+  $newPwd     = filter_input(INPUT_POST, 'new',     FILTER_UNSAFE_RAW, FILTER_REQUIRE_SCALAR);
+  $confirmPwd = filter_input(INPUT_POST, 'confirm', FILTER_UNSAFE_RAW, FILTER_REQUIRE_SCALAR);
+
+  $resultOrError = $accountService->handlePasswordChange($accountId, $currentPwd, $newPwd, $confirmPwd);
+  if ($resultOrError === true) {
+    echo '<h2>Password updated</h2>Your password has been updated!';
+  } else {
+    echo '<h2>Error</h2>Your password could not be updated: ' . $resultOrError . '.';
+  }
 }
 
 $settings = $db->getPreferences($accountId);
@@ -65,6 +82,19 @@ echo <<<HTML
     <tr><td colspan="2"><input type="submit" value="Update settings" /></td></tr>
   </table>
 
+</form>
+
+<h2>Change password</h2>
+<form method="post" action="settings.php">
+<table>
+ <tr><td>Current password:</td>
+     <td><input type="password" name="current" /></td></tr>
+ <tr><td>New password:</td>
+     <td><input type="password" name="new" minlength="6" /></td></tr>
+ <tr><td>Confirm password:</td>
+     <td><input type="password" name="confirm" minlength="6" /></td></tr>
+ <tr><td colspan="2"><input type="submit" value="Update password" /></td></tr>
+</table>
 </form>
 HTML;
 ?>

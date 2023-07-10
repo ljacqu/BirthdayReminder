@@ -154,6 +154,14 @@ class DatabaseConnector {
     return EventType::LOGIN_FAILED;
   }
 
+  function updatePassword($id, $passwordHash) {
+    $query = 'update br_account set password = :password where id = :id';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->bindParam(':password', $passwordHash);
+    $stmt->execute();
+  }
+
   function updateForSuccessfulAuth($id) {
     $query = 'update br_account set last_login = now(), failed_logins = 0 where id = :id';
     $stmt = $this->conn->prepare($query);
