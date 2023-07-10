@@ -39,7 +39,7 @@ if (isset($_POST['email'])) {
 
   if (!$hasAccount) {
     die('Error: please create an account first.<br /><a href="init.php">Initialization page</a>');
-  } else if ($db->hasAnyBirthday()) {
+  } else if ($db->countBirthdays() > 0) {
     die('Error: cannot create demo data. You already have entries! <a href="index.php">Main page</a>');
   }
 

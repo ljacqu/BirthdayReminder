@@ -39,7 +39,6 @@ require './html/header.php';
 Header::outputHeader(true, 'System', $accountInfo);
 
 echo '<h2>Recent events</h2>';
-
 $limit = 15;
 $offset = -1;
 if (isset($_GET['offset'])) {
@@ -124,8 +123,15 @@ if ($offset === -1) {
     echo '</table>';
   } else {
     echo '<a href="?users">Show users</a>';
+
+    echo '<h2>System overview</h2>';
+    echo 'Current time: ' . (new DateTime(null, Configuration::getTimeZone()))->format('Y-m-d, H:i');
+    echo '<br />PHP version: ' . PHP_VERSION;
+    echo '<br />Total birthdays: ' . $db->countBirthdays();
   }
 }
+
+
 ?>
 <script src="./html/unlock.js" type="text/javascript"></script>
 </body></html>

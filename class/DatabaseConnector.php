@@ -89,9 +89,8 @@ class DatabaseConnector {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
-  function hasAnyBirthday() {
-    $query = 'select exists (select 1 from br_birthday)';
-    $stmt = $this->conn->query($query);
+  function countBirthdays() {
+    $stmt = $this->conn->query('select count(1) from br_birthday');
     return $stmt->fetch()[0];
   }
 
