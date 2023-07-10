@@ -16,6 +16,10 @@ class DatabaseConnector {
       array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES 'utf8'"));
   }
 
+  /* **************
+   * Initialization
+   * ************** */
+
   function initTablesIfNeeded() {
     $stmt = $this->conn->query('select exists
 (select table_name from information_schema.TABLES where table_schema = "' . $this->name . '" and table_name = "br_birthday");');
@@ -24,6 +28,10 @@ class DatabaseConnector {
       $this->createTables();
     }
   }
+
+  /* ************
+   * Birthdays
+   * ************ */
 
   function findBirthdays(DateTime $from, DateTime $to) {
     $from2020 = '2020-' . $from->format('m-d');
@@ -42,6 +50,29 @@ class DatabaseConnector {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
+  /* *************
+   * Accounts
+   * ************* */
+
+  function addAccount($email, $pwdHash, $isAdmin=false) {
+    $query = 'insert into br_account (email, created, password, failed_logins, is_admin) values (:email, now(), :password, 0, :admin)';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':email', $email);
+    $stmt->bindParam(':password', $pwdHash);
+    $stmt->bindParam(':admin', $isAdmin);
+    $stmt->execute();
+  }
+
+  function hasAnyAccount() {
+    $query = 'select exists(select 1 from br_account)';
+    $stmt = $this->conn->query($query);
+    return (bool) $stmt->fetchColumn();
+  }
+
+  /* ***********
+   * Internal
+   * *********** */
+
   private function createTables() {
     // Create br_account
     $this->conn->exec('create table br_account (
@@ -51,7 +82,10 @@ class DatabaseConnector {
       password varchar(255) not null,
       failed_logins int not null,
       last_login timestamp,
-      primary key (id));');
+      is_admin bool not null,
+      primary key (id),
+      unique (email)
+      ) ENGINE = InnoDB');
 
     // Create br_birthday
     $this->conn->exec('create table br_birthday (
@@ -61,7 +95,8 @@ class DatabaseConnector {
       date_2020 date not null,
       name varchar(255) not null,
       primary key (id),
-      foreign key (account_id) references br_account(id));');
+      foreign key (account_id) references br_account(id)
+      ) ENGINE = InnoDB');
 
     // Create br_event
     $this->conn->exec('create table br_event (
@@ -70,6 +105,7 @@ class DatabaseConnector {
       date timestamp not null,
       info varchar(255),
       primary key (id),
-      foreign key (account_id) references br_account(id));');
+      foreign key (account_id) references br_account(id)
+      ) ENGINE = InnoDB');
   }
 }

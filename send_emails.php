@@ -1,8 +1,8 @@
 <?php
 
 require 'Configuration.php';
-require 'DatabaseConnector.php';
-require 'Mailer.php';
+require './class/DatabaseConnector.php';
+require './class/Mailer.php';
 
 $tomorrow = new DateTime(null, Configuration::getTimeZone());
 $tomorrow->modify('+1 day');
