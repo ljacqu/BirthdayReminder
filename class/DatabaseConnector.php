@@ -69,6 +69,26 @@ class DatabaseConnector {
     return (bool) $stmt->fetchColumn();
   }
 
+  /* *************
+   * Events
+   * ************* */
+
+  function getLatestEvent($type) {
+    $query = 'select * from br_event where type = :type order by date desc limit 1';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':type', $type);
+    $stmt->execute();
+    return $stmt->fetch();
+  }
+
+  function addEvent($type, $info) {
+    $query = 'insert into br_event (type, date, info) values (:type, now(), :info)';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':type', $type);
+    $stmt->bindParam(':info', $info);
+    $stmt->execute();
+  }
+
   /* ***********
    * Internal
    * *********** */
@@ -102,6 +122,7 @@ class DatabaseConnector {
     $this->conn->exec('create table br_event (
       id int auto_increment,
       account_id int,
+      type varchar(127) not null,
       date timestamp not null,
       info varchar(255),
       primary key (id),

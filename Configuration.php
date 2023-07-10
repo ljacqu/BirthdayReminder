@@ -11,6 +11,7 @@ class Configuration {
   const MAIL_MODE = 'P'; // S for 'send mails', P for 'print outputs'
 
   const TIME_ZONE = '';
+  const LOCAL_DEV = true;
 
 
   private function __construct() {
