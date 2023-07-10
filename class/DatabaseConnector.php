@@ -3,10 +3,7 @@
 class DatabaseConnector {
 
   private $conn;
-
-  private $host;
   private $name;
-
 
   function __construct() {
     $host = Configuration::DB_HOST;
@@ -50,14 +47,21 @@ class DatabaseConnector {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
+  function hasAnyBirthday() {
+    $query = 'select exists (select 1 from br_birthday)';
+    $stmt = $this->conn->query($query);
+    return $stmt->fetch()[0];
+  }
+
   function addBirthday($accountId, $name, DateTime $date) {
+    $dateStr = $date->format('Y-m-d');
     $date2020 = '2020-' . $date->format('m-d');
 
     $query = 'insert into br_birthday (account_id, name, date, date_2020) values (:accountId, :name, :date, :date2020)';
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':accountId', $accountId);
     $stmt->bindParam(':name', $name);
-    $stmt->bindParam(':date', $date);
+    $stmt->bindParam(':date', $dateStr);
     $stmt->bindParam(':date2020', $date2020);
     $stmt->execute();
   }
@@ -91,6 +95,12 @@ class DatabaseConnector {
       return $result['id'];
     }
     return null;
+  }
+
+  function fetchMinAccountId() {
+    $stmt = $this->conn->query('select min(id) from br_account');
+    $stmt->execute();
+    return $stmt->fetch()[0];
   }
 
   function verifyPassword($id, $pass) {
