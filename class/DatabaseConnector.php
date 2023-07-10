@@ -44,6 +44,8 @@ class DatabaseConnector {
                 on br_account.id = br_birthday.account_id
               where date_2020 = :date
                 and br_account.daily_mail = true
+                and NOT (br_account.daily_flag = "ignore" AND br_birthday.flag = true
+                         OR br_account.daily_flag = "filter" AND br_birthday.flag = false)
               order by account_id, date_2020, date desc';
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':date', $date2020);
@@ -71,6 +73,8 @@ class DatabaseConnector {
               where (date_2020 between :from1 and :to1
                      or date_2020 between :from2 and :to2)
                 and br_account.weekly_mail = :weekday
+                and NOT (br_account.weekly_flag = "ignore" AND br_birthday.flag = true
+                         OR br_account.weekly_flag = "filter" AND br_birthday.flag = false)
               order by case when month(date_2020) < month(:from1) then 1 else 0 end,
                        month(date_2020),
                        day(date_2020),
@@ -128,7 +132,7 @@ class DatabaseConnector {
     $dateStr = $date->format('Y-m-d');
     $date2020 = '2020-' . $date->format('m-d');
 
-    $query = 'insert into br_birthday (account_id, name, date, date_2020) values (:accountId, :name, :date, :date2020)';
+    $query = 'insert into br_birthday (account_id, name, date, date_2020, flag) values (:accountId, :name, :date, :date2020, false)';
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':accountId', $accountId);
     $stmt->bindParam(':name', $name);
@@ -241,19 +245,27 @@ class DatabaseConnector {
   }
 
   function getPreferences($id) {
-    $query = 'select daily_mail, weekly_mail, date_format from br_account where id = :id';
+    $query = 'select daily_mail, daily_flag, weekly_mail, weekly_flag, date_format from br_account where id = :id';
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':id', $id);
     $stmt->execute();
     return $stmt->fetch(PDO::FETCH_ASSOC);
   }
 
-  function updatePreferences($id, bool $dailyMail, int $weeklyMail, string $dateFormat) {
-    $query = 'update br_account set daily_mail = :daily, weekly_mail = :weekly, date_format = :dateFormat where id = :id';
+  function updatePreferences($id, bool $dailyMail, string $dailyFlag, int $weeklyMail, string $weeklyFlag, string $dateFormat) {
+    $query = 'update br_account
+              set daily_mail = :daily,
+                  daily_flag = :dailyFlag,
+                  weekly_mail = :weekly,
+                  weekly_flag = :weeklyFlag,
+                  date_format = :dateFormat
+              where id = :id';
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':id', $id);
     $stmt->bindParam(':daily', $dailyMail);
+    $stmt->bindParam(':dailyFlag', $dailyFlag);
     $stmt->bindParam(':weekly', $weeklyMail);
+    $stmt->bindParam(':weeklyFlag', $weeklyFlag);
     $stmt->bindParam(':dateFormat', $dateFormat);
     $stmt->execute();
   }
@@ -324,7 +336,9 @@ class DatabaseConnector {
       last_login timestamp,
       is_admin bool not null,
       daily_mail bool not null,
+      daily_flag varchar(31) not null,
       weekly_mail int not null,
+      weekly_flag varchar(31) not null,
       date_format varchar(127) not null,
       primary key (id),
       unique (email)
@@ -337,6 +351,7 @@ class DatabaseConnector {
       date date not null,
       date_2020 date not null,
       name varchar(255) not null,
+      flag bool not null,
       primary key (id),
       foreign key (account_id) references br_account(id)
       ) ENGINE = InnoDB');

@@ -10,6 +10,7 @@ require 'Configuration.php';
 require './model/EventType.php';
 require './class/ValidationException.php';
 require './model/DateFormat.php';
+require './model/FlagHandling.php';
 require './class/DatabaseConnector.php';
 
 $db = new DatabaseConnector();
@@ -37,15 +38,19 @@ $weeklyMailOptions = [
 
 if (isset($_POST['weekly'])) {
   $newDaily = !!filter_input(INPUT_POST, 'daily', FILTER_VALIDATE_BOOL);
+  $newDailyFlag = filter_input(INPUT_POST, 'dailyflag', FILTER_UNSAFE_RAW, FILTER_REQUIRE_SCALAR);
   $newWeekly = (int) filter_input(INPUT_POST, 'weekly', FILTER_VALIDATE_INT);
+  $newWeeklyFlag = filter_input(INPUT_POST, 'weeklyflag', FILTER_UNSAFE_RAW, FILTER_REQUIRE_SCALAR);
   $dateFormat = filter_input(INPUT_POST, 'dateformat', FILTER_UNSAFE_RAW, FILTER_REQUIRE_SCALAR);
 
   if ($newWeekly < -1 || $newWeekly > 6) {
     die('Error: invalid inputs');
   }
   DateFormat::validateFormat($dateFormat);
+  FlagHandling::validate($newDailyFlag);
+  FlagHandling::validate($newWeeklyFlag);
 
-  $db->updatePreferences($accountId, $newDaily, $newWeekly, $dateFormat);
+  $db->updatePreferences($accountId, $newDaily, $newDailyFlag, $newWeekly, $newWeeklyFlag, $dateFormat);
   echo '<h2>Settings updated</h2>Thanks! Your preferences have been updated.';
 
 
@@ -77,18 +82,33 @@ echo <<<HTML
       <td style="text-align: center"><input type="checkbox" id="daily" name="daily" $dailyChecked/></td>
     </tr>
     <tr>
-      <td><label for="weekly">Weekly mail:</label></td>
-      <td><select id="weekly" name="weekly">
+      <td><label for="dailyflag">Daily mail flag:</label></td>
+      <td><select id="dailyflag" name="dailyflag">
 HTML;
+$flagOptions = [
+  ['value' => 'none', 'label' => 'No relevance'],
+  ['value' => 'ignore', 'label' => 'Ignore for mails'],
+  ['value' => 'filter', 'label' => 'Only for entries with flag']
+];
+printOptions($flagOptions, $settings['daily_flag']);
+
+echo '</select></td></tr>
+    <tr>
+      <td><label for="weekly">Weekly mail:</label></td>
+      <td><select id="weekly" name="weekly">';
 printOptions($weeklyMailOptions, $settings['weekly_mail']);
 
-echo <<<HTML
-      </select></td>
+echo '</select></td>
     </tr>
     <tr>
-      <td>Date format:</td>
-      <td><select id="dateformat" name="dateformat">
-HTML;
+      <td><label for="weeklyflag">Weekly mail flag:</label></td>
+      <td><select id="weeklyflag" name="weeklyflag">';
+printOptions($flagOptions, $settings['weekly_flag']);
+
+echo '</select></td></tr>
+      <tr>
+      <td><label for="dateformat">Date format:</label></td>
+      <td><select id="dateformat" name="dateformat">';
 
 $dateOptions = array_map(function ($opt) {
   return [
