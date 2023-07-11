@@ -116,11 +116,12 @@ class DatabaseConnector {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
-  function findBirthdaysByAccountId($accountId) {
-    $query = 'select id, name, date
+  function findBirthdaysByAccountId($accountId, $limit=null) {
+    $limitQuery = $limit ? "limit $limit" : '';
+    $query = "select id, name, date, flag
               from br_birthday
               where account_id = :accountId
-              order by date_2020, year(date) desc';
+              order by date_2020, year(date) desc $limitQuery";
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam('accountId', $accountId);
     $stmt->execute();

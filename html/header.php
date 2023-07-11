@@ -8,6 +8,7 @@ final class Header {
   static function outputHeader($showLinks=false, $currentPage=null, $accountInfo=null) {
     $links = [
       ['page' => 'index.php', 'label' => 'Main'],
+      ['page' => 'birthdays.php', 'label' => 'Birthdays'],
       ['page' => 'settings.php', 'label' => 'Settings'],
       ['page' => 'export.php', 'label' => 'Export'],
       ['page' => 'logout.php', 'label' => 'Log out']

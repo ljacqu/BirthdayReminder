@@ -24,7 +24,7 @@ if (isset($_POST['export'])) {
   $output = '';
 
   foreach ($birthdays as $entry) {
-    $output .= "\"{$entry['name']}\",\"" . date('Y-m-d', strtotime($entry['date'])) . "\"\n";
+    $output .= "\"{$entry['name']}\",\"" . date('Y-m-d', strtotime($entry['date'])) . "\",\"${$entry['flag']}\"\n";
   }
 
   header("Content-type:text/csv; charset=utf-8");
