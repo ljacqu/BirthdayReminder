@@ -11,11 +11,12 @@ if (!isset($_POST['id'])) {
   exit;
 }
 
-require 'Configuration.php';
-require './class/DatabaseConnector.php';
+require '../Configuration.php';
+require '../class/DatabaseConnector.php';
 
 $birthdayId = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+$flag = !!filter_input(INPUT_POST, 'enabled', FILTER_VALIDATE_BOOL);
 if ($birthdayId) {
   $db = new DatabaseConnector();
-  $db->deleteBirthday($_SESSION['account'], $birthdayId);
+  $db->updateFlag($_SESSION['account'], $birthdayId, $flag);
 }

@@ -68,6 +68,6 @@ if (empty($entries)) {
   </table>
 </form>
 
-<script type="text/javascript" src="./html/delete.js"></script>
-<script type="text/javascript" src="./html/toggle_flag.js"></script>
+<script type="text/javascript" src="./js/delete.js"></script>
+<script type="text/javascript" src="./js/toggle_flag.js"></script>
 </body></html>

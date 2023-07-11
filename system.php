@@ -8,7 +8,7 @@ if (!isset($_SESSION['account'])) {
 
 require 'Configuration.php';
 require './model/EventType.php';
-require './class/ValidationException.php';
+require './model/ValidationException.php';
 require './class/DatabaseConnector.php';
 require './class/AccountService.php';
 

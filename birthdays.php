@@ -8,7 +8,7 @@ if (!isset($_SESSION['account'])) {
 
 require 'Configuration.php';
 require './model/EventType.php';
-require './class/ValidationException.php';
+require './model/ValidationException.php';
 require './model/DateFormat.php';
 require './model/FlagHandling.php';
 require './class/DatabaseConnector.php';
@@ -127,8 +127,8 @@ $rowTemplate = '<tr class="addrow">
   </table>
 </form>
 
-<script type="text/javascript" src="./html/add_rows.js"></script>
-<script type="text/javascript" src="./html/reset_addform.js"></script>
-<script type="text/javascript" src="./html/delete.js"></script>
-<script type="text/javascript" src="./html/toggle_flag.js"></script>
+<script type="text/javascript" src="./js/add_rows.js"></script>
+<script type="text/javascript" src="./js/reset_addform.js"></script>
+<script type="text/javascript" src="./js/delete.js"></script>
+<script type="text/javascript" src="./js/toggle_flag.js"></script>
 </body></html>

@@ -1,8 +1,8 @@
 <?php
 
 require 'Configuration.php';
+require './model/ValidationException.php';
 require './class/DatabaseConnector.php';
-require './class/ValidationException.php';
 require './class/AccountService.php';
 require './html/header.php';
 

@@ -12,7 +12,7 @@ deleteLinks.forEach(link => {
             const formData = new FormData();
             formData.append('id', id);
 
-            fetch('delete.php', {
+            fetch('./js/delete.php', {
                 method: 'POST',
                 body: formData
             })

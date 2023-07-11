@@ -11,7 +11,7 @@ flagBoxes.forEach(checkbox => {
         formData.append('id', id);
         formData.append('enabled', checked);
 
-        fetch('set_flag.php', {
+        fetch('./js/set_flag.php', {
             method: 'POST',
             body: formData
         })
