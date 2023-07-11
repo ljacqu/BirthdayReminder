@@ -148,6 +148,7 @@ class DatabaseConnector {
     $stmt->bindParam(':accountId', $accountId);
     $stmt->bindParam(':flag', $flag);
     $stmt->execute();
+    return $stmt->rowCount() > 0;
   }
 
   function deleteBirthday($accountId, $id) {
@@ -156,6 +157,7 @@ class DatabaseConnector {
     $stmt->bindParam(':accountId', $accountId);
     $stmt->bindParam(':id', $id);
     $stmt->execute();
+    return $stmt->rowCount() > 0;
   }
 
   /* *************

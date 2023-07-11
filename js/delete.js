@@ -14,13 +14,22 @@ deleteLinks.forEach(link => {
 
             fetch('./js/delete.php', {
                 method: 'POST',
+                redirect: 'error',
                 body: formData
             })
             .then(response => {
-                document.getElementById(`br${id}`).remove();
+                return response.json();
+            })
+            .then(content => {
+                    console.log(content);
+                if (content.success) {
+                    document.getElementById(`br${id}`).remove();
+                } else {
+                    link.innerHTML = 'Error';
+                }
             })
             .catch(error => {
-                link.innerHTML = 'Error';
+                link.parentElement.innerHTML = 'Error';
             });
         }
     });

@@ -91,7 +91,7 @@ if (empty($entries)) {
     echo '<tr id="br' . $id . '" ' . ($alt ? 'class="alt"' : '') . '>
       <td>' . htmlspecialchars($entry['name']) . '</td>
       <td>' . date($settings['date_format'], strtotime($entry['date'])) . '</td>
-      <td><input type="checkbox" class="flag" data-id="' . htmlspecialchars($entry['id']) . '" ' . $flagChecked . ' />
+      <td><input disabled="disabled" type="checkbox" class="flag" data-id="' . htmlspecialchars($entry['id']) . '" ' . $flagChecked . ' />
       <td><a href="?" class="delete" data-id="' . htmlspecialchars($entry['id']) . '">Delete</a></td>
     </tr>';
     $alt = !$alt;

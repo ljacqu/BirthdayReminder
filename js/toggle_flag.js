@@ -13,15 +13,24 @@ flagBoxes.forEach(checkbox => {
 
         fetch('./js/set_flag.php', {
             method: 'POST',
+            redirect: 'error',
             body: formData
         })
         .then(response => {
+            return response.json();
+        })
+        .then(content => {
+            if (content.success !== true) {
+                checkbox.checked = !checkbox.checked;
+            }
             checkbox.disabled = false;
         })
         .catch(error => {
+            console.log(error);
             checkbox.checked = !checkbox.checked;
             checkbox.disabled = false;
         });
-        
     });
+
+    checkbox.disabled = false;
 });
