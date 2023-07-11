@@ -1,16 +1,24 @@
 const nameCells = document.querySelectorAll('.dbleditname');
 
 nameCells.forEach(nameCell => {
+    let isInEditMode = false;
+
     nameCell.addEventListener('dblclick', event => {
+        if (isInEditMode) {
+            return; // Already displaying an input, so don't do it again
+        }
+
+        isInEditMode = true;
         const oldName = nameCell.textContent;
         const input = newInputElem('text', oldName);
 
-        input.addEventListener('focusout', event => {
+        let submitChangeAndSetText = (useOld) => {
             input.disabled = true;
-            
+
             const newName = input.value;
-            if (newName === oldName || !newName.trim()) {
+            if (useOld || newName === oldName || !newName.trim()) {
                 replaceElemWithTextNode(input, oldName);
+                isInEditMode = false;
             } else {
                 const formData = new FormData();
                 formData.append('name', newName);
@@ -23,13 +31,25 @@ nameCells.forEach(nameCell => {
                 })
                 .then(response => {
                     return response.json();
-                }).then(response => {
+                })
+                .then(response => {
                     const text = response.success ? newName : oldName;
                     replaceElemWithTextNode(input, text);
+                    isInEditMode = false;
                 })
                 .catch(error => {
                     replaceElemWithTextNode(input, oldName);
+                    isInEditMode = false;
                 });
+            }
+        };
+
+        input.addEventListener('focusout', event => submitChangeAndSetText(false));
+        input.addEventListener('keydown', event => {
+            if (event.key === 'Enter') {
+                submitChangeAndSetText(false);
+            } else if (event.key === 'Escape') {
+                submitChangeAndSetText(true);
             }
         });
 
@@ -40,17 +60,26 @@ nameCells.forEach(nameCell => {
 const dateCells = document.querySelectorAll('.dbleditdate');
 
 dateCells.forEach(dateCell => {
+    let isInEditMode = false;
+
     dateCell.addEventListener('dblclick', event => {
+        if (isInEditMode) {
+            return; // Already displaying an input, so don't do it again
+        }
+
+        isInEditMode = true;
+
         const oldDateText = dateCell.textContent;
         const oldDate = dateCell.dataset.date;
         const input = newInputElem('date', oldDate);
 
-        input.addEventListener('focusout', event => {
+        let submitChangeAndSetText = (useOld) => {
             input.disabled = true;
 
             const newDate = input.value;
-            if (newDate === oldDate || !newDate.trim()) {
+            if (useOld || newDate === oldDate || !newDate.trim()) {
                 replaceElemWithTextNode(input, oldDateText);
+                isInEditMode = false;
             } else {
                 const formData = new FormData();
                 formData.append('date', newDate);
@@ -63,14 +92,26 @@ dateCells.forEach(dateCell => {
                 })
                 .then(response => {
                     return response.json();
-                }).then(response => {
+                })
+                .then(response => {
                     const text = response.success ? response.newText : oldDateText;
                     dateCell.dataset.date = newDate;
                     replaceElemWithTextNode(input, text);
+                    isInEditMode = false;
                 })
                 .catch(error => {
                     replaceElemWithTextNode(input, oldDateText);
+                    isInEditMode = false;
                 });
+            }
+        };
+
+        input.addEventListener('focusout', event => submitChangeAndSetText(false));
+        input.addEventListener('keydown', event => {
+            if (event.key === 'Enter') {
+                submitChangeAndSetText(false);
+            } else if (event.key === 'Escape') {
+                submitChangeAndSetText(true);
             }
         });
 
