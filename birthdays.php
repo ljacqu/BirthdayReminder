@@ -88,11 +88,11 @@ if (empty($entries)) {
     $id = htmlspecialchars($entry['id']);
     $flagChecked = $entry['flag'] ? 'checked="checked"' : '';
 
-    echo '<tr id="br' . $id . '" ' . ($alt ? 'class="alt"' : '') . '>
-      <td>' . htmlspecialchars($entry['name']) . '</td>
-      <td>' . date($settings['date_format'], strtotime($entry['date'])) . '</td>
-      <td><input disabled="disabled" type="checkbox" class="flag" data-id="' . htmlspecialchars($entry['id']) . '" ' . $flagChecked . ' />
-      <td><a href="?" class="delete" data-id="' . htmlspecialchars($entry['id']) . '">Delete</a></td>
+    echo '<tr id="br' . $id . '" ' . ($alt ? 'class="alt"' : '') . ' data-id="' . htmlspecialchars($entry['id']) . '">
+      <td class="dbleditname">' . htmlspecialchars($entry['name']) . '</td>
+      <td class="dbleditdate" data-date="' . $entry['date'] .'">' . date($settings['date_format'], strtotime($entry['date'])) . '</td>
+      <td><input disabled="disabled" type="checkbox" class="flag" ' . $flagChecked . ' />
+      <td><a href="?" class="delete">Delete</a></td>
     </tr>';
     $alt = !$alt;
   }
@@ -127,8 +127,10 @@ $rowTemplate = '<tr class="addrow">
   </table>
 </form>
 
+<script type="text/javascript" src="./js/edit.js"></script>
+<script type="text/javascript" src="./js/toggle_flag.js"></script>
+<script type="text/javascript" src="./js/delete.js"></script>
+
 <script type="text/javascript" src="./js/add_rows.js"></script>
 <script type="text/javascript" src="./js/reset_addform.js"></script>
-<script type="text/javascript" src="./js/delete.js"></script>
-<script type="text/javascript" src="./js/toggle_flag.js"></script>
 </body></html>

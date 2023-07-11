@@ -38,12 +38,12 @@ if (empty($entries)) {
     $id = htmlspecialchars($entry['id']);
     $flagChecked = $entry['flag'] ? 'checked="checked"' : '';
 
-    echo '<tr id="br' . $id . '" ' . ($alt ? 'class="alt"' : '') . '>
+    echo '<tr id="br' . $id . '" ' . ($alt ? 'class="alt"' : '') . ' data-id="' . htmlspecialchars($entry['id']) . '">
       <td>' . htmlspecialchars($entry['name']) . '</td>
       <td>' . date($settings['date_format'], strtotime($entry['date'])) . '</td>
       <td>' . $ageCalculator->calculateFutureAge($from, $entry['date']) . '</td>
-      <td><input disabled="disabled" type="checkbox" class="flag" data-id="' . htmlspecialchars($entry['id']) . '" ' . $flagChecked . ' />
-      <td><a href="?" class="delete" data-id="' . htmlspecialchars($entry['id']) . '">Delete</a></td>
+      <td><input disabled="disabled" type="checkbox" class="flag" ' . $flagChecked . ' />
+      <td><a href="?" class="delete">Delete</a></td>
     </tr>';
     $alt = !$alt;
   }

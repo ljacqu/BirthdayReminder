@@ -133,5 +133,5 @@ if ($offset === -1) {
 
 
 ?>
-<script src="./html/unlock.js" type="text/javascript"></script>
+<script src="./js/unlock.js" type="text/javascript"></script>
 </body></html>

@@ -14,6 +14,7 @@ unlockLinks.forEach(link => {
 
             fetch('system.php', {
                 method: 'POST',
+                redirect: 'error',
                 body: formData
             })
             .then(response => {

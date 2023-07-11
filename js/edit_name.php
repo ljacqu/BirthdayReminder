@@ -15,7 +15,10 @@ require '../Configuration.php';
 require '../class/DatabaseConnector.php';
 header('Content-Type: application/json');
 
+$accountId = $_SESSION['account'];
 $birthdayId = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+$name = filter_input(INPUT_POST, 'name', FILTER_UNSAFE_RAW, FILTER_REQUIRE_SCALAR);
+
 $db = new DatabaseConnector();
-$result = $birthdayId && $db->deleteBirthday($_SESSION['account'], $birthdayId);
+$result = $name && $db->updateBirthdayName($accountId, $birthdayId, $name);
 echo json_encode(['success' => $result]);

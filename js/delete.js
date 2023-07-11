@@ -8,7 +8,7 @@ deleteLinks.forEach(link => {
         const confirmed = confirm('Are you sure you want to delete this entry?');
 
         if (confirmed) {
-            const id = link.dataset.id;
+            const id = link.closest('tr').dataset.id;
             const formData = new FormData();
             formData.append('id', id);
 

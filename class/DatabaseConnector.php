@@ -141,6 +141,30 @@ class DatabaseConnector {
     $stmt->execute();
   }
 
+  function updateBirthdayName($accountId, $id, $name) {
+    $query = 'update br_birthday set name = :name where id = :id and account_id = :accountId';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->bindParam(':accountId', $accountId);
+    $stmt->bindParam(':name', $name);
+    $stmt->execute();
+    return $stmt->rowCount() > 0;
+  }
+
+  function updateBirthdayDate($accountId, $id, DateTime $date) {
+    $dateStr = $date->format('Y-m-d');
+    $date2020 = '2020-' . $date->format('m-d');
+
+    $query = 'update br_birthday set date = :date, date_2020 = :date2020 where id = :id and account_id = :accountId';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->bindParam(':accountId', $accountId);
+    $stmt->bindParam(':date', $dateStr);
+    $stmt->bindParam(':date2020', $date2020);
+    $stmt->execute();
+    return $stmt->rowCount() > 0;
+  }
+
   function updateFlag($accountId, $id, $flag) {
     $query = 'update br_birthday set flag = :flag where id = :id and account_id = :accountId';
     $stmt = $this->conn->prepare($query);
