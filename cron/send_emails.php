@@ -17,7 +17,8 @@ if (!empty(Configuration::CRON_SECRET)) {
   }
 
   if ($secret !== Configuration::CRON_SECRET) {
-    die('Error: Invalid or missing key (' . print_r($secret, true) . ')');
+    http_response_code(403);
+    die('Error: Invalid or missing key (got: ' . print_r($secret, true) . ')');
   }
 }
 
@@ -34,6 +35,7 @@ if ($lastDailyEvent) {
   if (date('Y-M-d') === date('Y-M-d', strtotime($date))) {
     echo 'Mails have already been generated for today (at ' . $date . ')';
     if (!isset($_GET['force'])) {
+      http_response_code(400);
       exit;
     }
   }
@@ -70,7 +72,7 @@ echo "\n\nFound " . count($weeklyBirthdays) . ' birthdays for next week (' . $to
 
 $birthdaysByAccountId = groupByAccountId($weeklyBirthdays);
 
-$missingAccountIds = array_diff(array_keys($emailSettingsByAccountId), array_keys($birthdaysByAccountId));
+$missingAccountIds = array_diff(array_keys($birthdaysByAccountId), array_keys($emailSettingsByAccountId));
 if (!empty($missingAccountIds)) {
   $additionalEmailValues = $db->getValuesForEmail($missingAccountIds);
   foreach ($additionalEmailValues as $accountId => $emailInfo) {

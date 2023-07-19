@@ -15,7 +15,8 @@ if (!empty(Configuration::CRON_SECRET)) {
   }
 
   if ($secret !== Configuration::CRON_SECRET) {
-    die('Error: Invalid or missing key (' . print_r($secret, true) . ')');
+    http_response_code(403);
+    die('Error: Invalid or missing key (got: ' . print_r($secret, true) . ')');
   }
 }
 

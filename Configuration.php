@@ -25,7 +25,7 @@ class Configuration {
    */
   const MAIL_FROM = 'birthdays@example.org';
   /** If false, no emails are ever actually sent. Useful for local development. */
-  const MAIL_SEND = true;
+  const MAIL_SEND = false;
   /** If true, the contents of all emails are also output on the page sending them. Useful for local development. */
   const MAIL_PRINT_CONTENTS = false;
 
@@ -38,7 +38,7 @@ class Configuration {
    * send_emails.php daily at 11 PM or so. If you run the job at 3 AM, this should be false to get
    * the same day's birthdays per mail.
    */
-  const MAIL_FOR_TOMORROW = false;
+  const MAIL_FOR_TOMORROW = true;
 
 
   // ------

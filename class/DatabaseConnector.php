@@ -267,6 +267,10 @@ class DatabaseConnector {
   }
 
   function getValuesForEmail($accountIds) {
+    if (empty($accountIds)) {
+      return [];
+    }
+
     $placeholders = implode(',', array_fill(0, count($accountIds), '?'));
     $query = "select id, email, date_format
               from br_account
