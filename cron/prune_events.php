@@ -5,9 +5,16 @@ require '../Configuration.php';
 require '../model/EventType.php';
 require '../class/DatabaseConnector.php';
 
-$cronSecret = filter_input(INPUT_GET, 'key', FILTER_UNSAFE_RAW, FILTER_REQUIRE_SCALAR);
-if ($cronSecret !== Configuration::CRON_SECRET && !empty(Configuration::CRON_SECRET)) {
-  die('Invalid or missing key');
+if (!empty(Configuration::CRON_SECRET)) {
+  if (isset($_SERVER['argv']) && isset($_SERVER['argv'][1]) && is_scalar($_SERVER['argv'][1])) {
+    $secret = $_SERVER['argv'][1];
+  } else {
+    $secret = filter_input(INPUT_GET, 'key', FILTER_UNSAFE_RAW, FILTER_REQUIRE_SCALAR);
+  }
+
+  if ($secret !== Configuration::CRON_SECRET) {
+    die('Error: Invalid or missing key (' . print_r($secret, true) . ')');
+  }
 }
 
 $eventsMinDate = new DateTime(null, Configuration::getTimeZone());

@@ -40,6 +40,19 @@ tr.alt td {
     background-color: #ffc;
 }
 
+a:link, a:visited {
+    color: #009;
+}
+a:focus, a:hover {
+    color: #44f;
+}
+
 p.navigation {
     font-weight: bold;
+}
+.fakelink {
+    color: #33c;
+}
+.fakelink:hover {
+    cursor: pointer;
 }

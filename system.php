@@ -119,7 +119,7 @@ if ($offset === -1) {
         <tr><th>ID</th><th>Email</th><th>Created</th>
             <th>Locked</th><th>Last login</th><th>Admin</th></tr>';
     foreach ($accounts as $account) {
-      $locked = $account['failed_logins'] >= DatabaseConnector::MAX_FAILED_LOGINS 
+      $locked = $account['failed_logins'] >= DatabaseConnector::MAX_FAILED_LOGINS
         ? '<a href="#" title="Unlock user" class="unlock" data-id="' . $account['id'] . '">Y</a>'
         : 'n';
       $admin = $account['is_admin'] ? 'Y' : 'n';
@@ -136,11 +136,14 @@ if ($offset === -1) {
     echo '<br />Total birthdays: ' . $db->countBirthdays();
 
     echo '<h2>CRON files</h2>';
-    $keyAddition = empty(Configuration::CRON_SECRET) ? '' : '?key=' . Configuration::CRON_SECRET;
+    $keyAddition = empty(Configuration::CRON_SECRET) ? '' : ' ' . Configuration::CRON_SECRET;
 
-    echo 'Set up CRON jobs to send out emails and clear out events occasionally. Examples:<ul>';
-    echo '<li>Send emails every day at 03:19 AM: <code>19 3 * * * php PATH/cron/send_emails.php' . $keyAddition . '</code></li>';
-    echo '<li>Prune events every Thursday at 11:14 PM: <code>14 23 * * 4 php PATH/cron/clear_events.php' . $keyAddition . '</code></li>';
+    echo 'Set up CRON jobs to send out emails daily, and to occasionally prune events. Examples:<ul>';
+    echo '<li><code>19 3 * * * php ' . __DIR__ . '/cron/send_emails.php' . $keyAddition . '</code> to send necessary emails every day at 3:19 AM</li>';
+    echo '<li><code>14 23 * * 0 php ' . __DIR__ . '/cron/prune_events.php' . $keyAddition . '</code> to prune events every Sunday at 11:14 PM: </li>';
+    echo '<li class="manual" style="display: none">Send mails manually: <a href="./cron/send_emails.php?key=' . Configuration::CRON_SECRET . '">Send emails</a></li>';
+    echo '<li class="manual" style="display: none">Prune events manually: <a href="./cron/prune_events.php?key=' . Configuration::CRON_SECRET . '">Prune events</a></li>';
+    echo "<li onclick=\"document.querySelectorAll('.manual').forEach(e => e.style.display = 'list-item'); this.style.display = 'none';\"><span class='fakelink'>Open pages manually</span></li>";
     echo '</ul>';
   }
 }
