@@ -16,4 +16,10 @@ final class FlagHandling {
       throw new ValidationException('Invalid flag handling value');
     }
   }
+
+  static function getFlagText($dailyHandling, $weeklyHandling) {
+    if ($dailyHandling === 'ignore') {
+      
+    }
+  }
 }

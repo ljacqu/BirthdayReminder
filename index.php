@@ -7,6 +7,7 @@ if (!isset($_SESSION['account'])) {
 }
 
 require 'Configuration.php';
+require './model/UserPreference.php';
 require './class/DatabaseConnector.php';
 require './class/AgeCalculator.php';
 
@@ -40,7 +41,7 @@ if (empty($entries)) {
 
     echo '<tr id="br' . $id . '" ' . ($alt ? 'class="alt"' : '') . ' data-id="' . htmlspecialchars($entry['id']) . '">
       <td>' . htmlspecialchars($entry['name']) . '</td>
-      <td>' . date($settings['date_format'], strtotime($entry['date'])) . '</td>
+      <td>' . date($settings->getDateFormat(), strtotime($entry['date'])) . '</td>
       <td>' . $ageCalculator->calculateFutureAge($from, $entry['date']) . '</td>
       <td><input disabled="disabled" type="checkbox" class="flag" ' . $flagChecked . ' />
       <td><a href="?" class="delete">Delete</a></td>

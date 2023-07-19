@@ -11,6 +11,7 @@ require './model/EventType.php';
 require './model/ValidationException.php';
 require './model/DateFormat.php';
 require './model/FlagHandling.php';
+require './model/UserPreference.php';
 require './class/DatabaseConnector.php';
 
 $db = new DatabaseConnector();
@@ -50,7 +51,14 @@ if (isset($_POST['weekly'])) {
   FlagHandling::validate($newDailyFlag);
   FlagHandling::validate($newWeeklyFlag);
 
-  $db->updatePreferences($accountId, $newDaily, $newDailyFlag, $newWeekly, $newWeeklyFlag, $dateFormat);
+  $pref = new UserPreference();
+  $pref->setDailyMail($newDaily);
+  $pref->setDailyFlag($newDailyFlag);
+  $pref->setWeeklyMail($newWeekly);
+  $pref->setWeeklyFlag($newWeeklyFlag);
+  $pref->setDateFormat($dateFormat);
+
+  $db->updatePreferences($accountId, $pref);
   echo '<h2>Settings updated</h2>Thanks! Your preferences have been updated.';
 
 
@@ -71,7 +79,7 @@ if (isset($_POST['weekly'])) {
 }
 
 $settings = $db->getPreferences($accountId);
-$dailyChecked = $settings['daily_mail'] ? 'checked="checked"' : '';
+$dailyChecked = $settings->getDailyMail() ? 'checked="checked"' : '';
 
 echo <<<HTML
 <h2>Preferences</h2>
@@ -90,20 +98,20 @@ $flagOptions = [
   ['value' => 'ignore', 'label' => 'Ignore for mails'],
   ['value' => 'filter', 'label' => 'Only for entries with flag']
 ];
-printOptions($flagOptions, $settings['daily_flag']);
+printOptions($flagOptions, $settings->getDailyFlag());
 
 echo '</select></td></tr>
     <tr>
       <td><label for="weekly">Weekly mail:</label></td>
       <td><select id="weekly" name="weekly">';
-printOptions($weeklyMailOptions, $settings['weekly_mail']);
+printOptions($weeklyMailOptions, (string) $settings->getWeeklyMail());
 
 echo '</select></td>
     </tr>
     <tr>
       <td><label for="weeklyflag">Weekly mail flag:</label></td>
       <td><select id="weeklyflag" name="weeklyflag">';
-printOptions($flagOptions, $settings['weekly_flag']);
+printOptions($flagOptions, $settings->getWeeklyFlag());
 
 echo '</select></td></tr>
       <tr>
@@ -116,7 +124,7 @@ $dateOptions = array_map(function ($opt) {
     'label' => date($opt, strtotime('2020-03-14'))
   ];
 }, DateFormat::getAllFormats());
-printOptions($dateOptions, $settings['date_format']);
+printOptions($dateOptions, $settings->getDateFormat());
 
 echo <<<HTML
 </select></td>

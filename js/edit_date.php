@@ -12,6 +12,7 @@ if (!isset($_POST['id'])) {
 }
 
 require '../Configuration.php';
+require '../model/UserPreference.php';
 require '../class/DatabaseConnector.php';
 header('Content-Type: application/json');
 
@@ -26,7 +27,7 @@ $result = false;
 if ($date) {
   $dateTime = new DateTime($date);
   $result = $db->updateBirthdayDate($accountId, $birthdayId, $dateTime);
-  $dateFormat = $db->getPreferences($accountId)['date_format'];
+  $dateFormat = $db->getPreferences($accountId)->getDateFormat();
   $newText = $dateTime->format($dateFormat);
 }
 

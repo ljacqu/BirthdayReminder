@@ -279,15 +279,23 @@ class DatabaseConnector {
     $stmt->execute();
   }
 
-  function getPreferences($id) {
+  function getPreferences($id): UserPreference {
     $query = 'select daily_mail, daily_flag, weekly_mail, weekly_flag, date_format from br_account where id = :id';
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':id', $id);
     $stmt->execute();
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $preference = new UserPreference();
+    $preference->setDailyMail($result['daily_mail']);
+    $preference->setDailyFlag($result['daily_flag']);
+    $preference->setWeeklyMail($result['weekly_mail']);
+    $preference->setWeeklyFlag($result['weekly_flag']);
+    $preference->setDateFormat($result['date_format']);
+    return $preference;
   }
 
-  function updatePreferences($id, bool $dailyMail, string $dailyFlag, int $weeklyMail, string $weeklyFlag, string $dateFormat) {
+  function updatePreferences($id, UserPreference $preference) {
     $query = 'update br_account
               set daily_mail = :daily,
                   daily_flag = :dailyFlag,
@@ -295,6 +303,12 @@ class DatabaseConnector {
                   weekly_flag = :weeklyFlag,
                   date_format = :dateFormat
               where id = :id';
+    $dailyMail = $preference->getDailyMail();
+    $dailyFlag = $preference->getDailyFlag();
+    $weeklyMail = $preference->getWeeklyMail();
+    $weeklyFlag = $preference->getWeeklyFlag();
+    $dateFormat = $preference->getDateFormat();
+
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':id', $id);
     $stmt->bindParam(':daily', $dailyMail);

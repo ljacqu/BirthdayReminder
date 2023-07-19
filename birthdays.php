@@ -11,6 +11,7 @@ require './model/EventType.php';
 require './model/ValidationException.php';
 require './model/DateFormat.php';
 require './model/FlagHandling.php';
+require './model/UserPreference.php';
 require './class/DatabaseConnector.php';
 require './class/AgeCalculator.php';
 
@@ -90,7 +91,7 @@ if (empty($entries)) {
 
     echo '<tr id="br' . $id . '" ' . ($alt ? 'class="alt"' : '') . ' data-id="' . htmlspecialchars($entry['id']) . '">
       <td class="dbleditname">' . htmlspecialchars($entry['name']) . '</td>
-      <td class="dbleditdate" data-date="' . $entry['date'] .'">' . date($settings['date_format'], strtotime($entry['date'])) . '</td>
+      <td class="dbleditdate" data-date="' . $entry['date'] .'">' . date($settings->getDateFormat(), strtotime($entry['date'])) . '</td>
       <td><input disabled="disabled" type="checkbox" class="flag" ' . $flagChecked . ' />
       <td><a href="?" class="delete">Delete</a></td>
     </tr>';
