@@ -80,8 +80,9 @@ if (isset($_POST['weekly'])) {
   } else if ($db->findAccountIdByEmail($newEmail) !== null) {
     echo '<h2>Error</h2>The email address is already in use by another account.';
   } else {
+    $oldEmail = $db->fetchEmail($accountId);
     $db->updateEmail($accountId, $newEmail);
-    $db->addEvent(EventType::EMAIL_CHANGE, $_SERVER['REMOTE_ADDR'] . ';' . $newEmail, $accountId);
+    $db->addEvent(EventType::EMAIL_CHANGE, "$oldEmail -> $newEmail", $accountId);
     echo '<h2>Email updated</h2>Your email address has been updated!';
   }
 

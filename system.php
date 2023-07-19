@@ -59,11 +59,12 @@ if (empty($events)) {
   echo 'No events to display.';
 } else {
   echo '<table class="bordered">
-        <tr><th>Date</th><th>Type</th><th>Account ID</th><th>Additional data</th></tr>';
+        <tr><th>Date</th><th>Type</th><th>Account ID</th><th>IP address</th><th>Additional data</th></tr>';
   foreach ($events as $event) {
     echo "<tr>
             <td>" . date('Y-m-d, H:i', strtotime($event['date'])) . "</td>
             <td>{$event['type']}</td><td>{$event['account_id']}</td>
+            <td>{$event['ip_address']}</td>
             <td>{$event['info']}</td>
           </tr>";
   }

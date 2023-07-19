@@ -384,11 +384,14 @@ class DatabaseConnector {
   }
 
   function addEvent($type, $info, $accountId=null) {
-    $query = 'insert into br_event (type, date, info, account_id) values (:type, now(), :info, :account)';
+    $query = 'insert into br_event (type, date, info, account_id, ip_address) values (:type, now(), :info, :account, :ipAddress)';
+    $ipAddress = $_SERVER['REMOTE_ADDR'];
+
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':type', $type);
     $stmt->bindParam(':info', $info);
     $stmt->bindParam(':account', $accountId);
+    $stmt->bindParam(':ipAddress', $ipAddress);
     $stmt->execute();
   }
 
@@ -443,6 +446,7 @@ class DatabaseConnector {
       type varchar(127) not null,
       date timestamp not null,
       info varchar(255),
+      ip_address varchar(63),
       primary key (id),
       foreign key (account_id) references br_account(id)
       ) ENGINE = InnoDB');

@@ -15,7 +15,7 @@ class AccountService {
     $id = $this->db->findAccountIdByEmail($email);
     if ($id) {
       $loginEvent = $this->db->verifyPassword($id, $password);
-      $this->db->addEvent($loginEvent, $_SERVER['REMOTE_ADDR'], $id);
+      $this->db->addEvent($loginEvent, null, $id);
 
       if ($loginEvent === EventType::LOGIN_SUCCESS) {
         $this->db->updateForSuccessfulAuth($id);
@@ -24,7 +24,7 @@ class AccountService {
         $this->db->updateForFailedAuth($id);
       }
     } else {
-      $this->db->addEvent(EventType::LOGIN_FAILED, $_SERVER['REMOTE_ADDR']);
+      $this->db->addEvent(EventType::LOGIN_FAILED, $email);
     }
     return null;
   }
@@ -66,7 +66,7 @@ class AccountService {
 
     $newHash = $this->hashPassword($newPwd);
     $this->db->updatePassword($accountId, $newHash);
-    $this->db->addEvent(EventType::PASSWORD_CHANGE, $_SERVER['REMOTE_ADDR'], $accountId);
+    $this->db->addEvent(EventType::PASSWORD_CHANGE, null, $accountId);
     return true;
   }
 
