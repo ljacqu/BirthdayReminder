@@ -140,9 +140,9 @@ if ($offset === -1) {
 
     echo 'Set up CRON jobs to send out emails daily, and to occasionally prune events. Examples:<ul>';
     if (Configuration::MAIL_FOR_TOMORROW) {
-      echo '<li><code>19 3 * * * php ' . __DIR__ . '/cron/send_emails.php' . $keyAddition . '</code> to send necessary emails every day at 3:19 AM</li>';
-    } else {
       echo '<li><code>17 22 * * * php ' . __DIR__ . '/cron/send_emails.php' . $keyAddition . '</code> to send necessary emails every day at 10:17 PM</li>';
+    } else {
+      echo '<li><code>19 3 * * * php ' . __DIR__ . '/cron/send_emails.php' . $keyAddition . '</code> to send necessary emails every day at 3:19 AM</li>';
     }
     echo '<li><code>14 23 * * 0 php ' . __DIR__ . '/cron/prune_events.php' . $keyAddition . '</code> to prune events every Sunday at 11:14 PM</li>';
     echo '<li class="manual" style="display: none">Send mails manually: <a href="./cron/send_emails.php?key=' . Configuration::CRON_SECRET . '">Send emails</a></li>';
