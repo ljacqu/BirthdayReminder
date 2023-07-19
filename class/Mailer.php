@@ -81,8 +81,24 @@ class Mailer {
     return $this->sendMail($to, "Next week's birthdays ($totalBirthdays)", $msg);
   }
 
-  private function sendMail(string $to, string $subject, string $message): bool {
-    if ($this->outputEmails) {
+  function sendPasswordResetEmail(string $to, string $token): bool {
+    $selfLink = empty(Configuration::MAIL_LINK_TO_RESET_PAGE) 
+      ?? ($_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/' . $_SERVER['PHP_SELF']);
+
+    $expirationHours = AccountService::RESET_TOKEN_MAX_AGE_HOURS;
+    $message = "Hello,
+
+A password reset has been requested for your account. Click here if you want to reset your password: $selfLink?t={$token}. The link will expire in $expirationHours hours.
+
+Please delete this email if you did not request to change your password.
+
+Thanks!";
+
+    return $this->sendMail($to, "Birthday reminder: password reset", $message, true);
+  }
+
+  private function sendMail(string $to, string $subject, string $message, bool $noDebugOutput=false): bool {
+    if ($this->outputEmails && !$noDebugOutput) {
       echo "\n[********** Email debug **********]";
       echo "\nTo: $to, Subject: $subject";
       echo "\nMessage: $message\n[********** /Email debug **********]\n";

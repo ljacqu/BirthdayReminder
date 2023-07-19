@@ -313,6 +313,32 @@ class DatabaseConnector {
     $stmt->execute();
   }
 
+  function setResetToken(string $email): string|null {
+    $query = 'update br_account set pass_token = :token, pass_token_date = now() where email = :email';
+    $token = self::createRandomString(63);
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':token', $token);
+    $stmt->bindParam(':email', $email);
+    $stmt->execute();
+    return $stmt->rowCount() > 0 ? $token : null;
+  }
+
+  function clearResetToken($id) {
+    $query = 'update br_account set pass_token = null, pass_token_date = null where id = :id';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->execute();
+  }
+
+  function getAccountFromResetToken(string $token) {
+    $query = 'select id, email, pass_token_date, failed_logins from br_account where pass_token = :token';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam('token', $token);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+  }
+
   function getPreferences($id): UserPreference {
     $query = 'select daily_mail, daily_flag, weekly_mail, weekly_flag, date_format from br_account where id = :id';
     $stmt = $this->conn->prepare($query);
@@ -437,6 +463,8 @@ class DatabaseConnector {
       weekly_mail int not null,
       weekly_flag varchar(31) not null,
       date_format varchar(127) not null,
+      pass_token varchar(63),
+      pass_token_date timestamp,
       primary key (id),
       unique (email)
       ) ENGINE = InnoDB');
@@ -467,10 +495,14 @@ class DatabaseConnector {
   }
 
   private static function createSessionSecret() {
+    return self::createRandomString(self::SESSION_SECRET_LENGTH);
+  }
+
+  private static function createRandomString(int $length): string {
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $charactersLength = strlen($characters);
     $randomString = '';
-    for ($i = 0; $i < self::SESSION_SECRET_LENGTH; $i++) {
+    for ($i = 0; $i < $length; $i++) {
       $randomString .= $characters[random_int(0, $charactersLength - 1)];
     }
     return $randomString;

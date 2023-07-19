@@ -44,7 +44,7 @@ Header::outputHeader();
         <td><input type="email" id="email" name="email" value="<?php echo htmlspecialchars($email); ?>" /></td></tr>
     <tr><td><label for="password">Password:</label></td>
         <td><input type="password" id="password" name="password" /></td></tr>
-    <tr><td colspan="2"><input type="submit" value="Log in" /></td></tr>
+    <tr><td colspan="2"><input type="submit" value="Log in" /> &nbsp; <a href="resetpw.php">Reset password</a></td></tr>
   </table>
 </form>
 </body></html>

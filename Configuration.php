@@ -46,6 +46,12 @@ class Configuration {
    * values. Open a GitHub issue if you need assistance: https://github.com/ljacqu/BirthdayReminder/issues
    */
   const MAIL_SCRIPT_OUTPUTS = ~0;
+  /**
+   * Add a full HTTP(S) link to the reset password page here if it is not generated correctly. If empty,
+   * the mailer will try to construct the link to the resetpw.php page by itself. This may not work correctly
+   * for subdomains.
+   */
+  const MAIL_LINK_TO_RESET_PAGE = '';
 
 
   // ------

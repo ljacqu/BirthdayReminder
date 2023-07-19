@@ -3,6 +3,7 @@
 class AccountService {
 
   const MIN_PASS_LENGTH = 6;
+  const RESET_TOKEN_MAX_AGE_HOURS = 6;
   private const SESSION_SECRET_LENGTH = 31;
 
   private DatabaseConnector $db;
@@ -68,6 +69,36 @@ class AccountService {
     $this->db->updatePassword($accountId, $newHash);
     $this->db->addEvent(EventType::PASSWORD_CHANGE, null, $accountId);
     return true;
+  }
+
+  function setNewPassword($accountId, $newPwd, $confirmPwd) {
+    if (!$newPwd || strlen($newPwd) < self::MIN_PASS_LENGTH) {
+      return 'Please provide a new password with at least ' . self::MIN_PASS_LENGTH . ' characters';
+    } else if ($newPwd !== $confirmPwd) {
+      return 'The new password and the confirmation did not match';
+    }
+
+    $newHash = $this->hashPassword($newPwd);
+    $this->db->updatePassword($accountId, $newHash);
+    $this->db->clearResetToken($accountId);
+    $this->db->addEvent(EventType::TOKEN_RESET_PASSWORD, null, $accountId);
+    return true;
+  }
+
+  function getAccountOrErrorForResetToken($token) {
+    $details = $this->db->getAccountFromResetToken($token);
+    if (!$details) {
+      return ['error' => 'no_match'];
+    }
+    if ($details['failed_logins'] > DatabaseConnector::MAX_FAILED_LOGINS) {
+      return ['error' => 'locked'];
+    }
+    $tokenDate = strtotime($details['pass_token_date']);
+    if ((time() - $tokenDate) > self::RESET_TOKEN_MAX_AGE_HOURS * 3600) {
+      return ['error' => 'expired'];
+    }
+
+    return ['id' => $details['id'], 'email' => $details['email']];
   }
 
   private function hashPassword($pwd) {
