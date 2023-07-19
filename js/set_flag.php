@@ -13,11 +13,20 @@ if (!isset($_POST['id'])) {
 
 require '../Configuration.php';
 require '../class/DatabaseConnector.php';
+require '../class/SessionService.php';
+
+$accountId = $_SESSION['account'];
+$db = new DatabaseConnector();
+$accountInfo = $db->getValuesForSession($accountId);
+if (!SessionService::isSessionValid($accountInfo['session_secret'])) {
+  http_response_code(403);
+  die('Not logged in');
+}
+
 header('Content-Type: application/json');
 
 $birthdayId = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 $flag = !!filter_input(INPUT_POST, 'enabled', FILTER_VALIDATE_BOOL);
-$db = new DatabaseConnector();
 
-$result = $birthdayId && $db->updateFlag($_SESSION['account'], $birthdayId, $flag);
+$result = $birthdayId && $db->updateFlag($accountId, $birthdayId, $flag);
 echo json_encode(['success' => $result]);

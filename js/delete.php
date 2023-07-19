@@ -13,9 +13,19 @@ if (!isset($_POST['id'])) {
 
 require '../Configuration.php';
 require '../class/DatabaseConnector.php';
+require '../class/SessionService.php';
+
+$db = new DatabaseConnector();
+$accountId = $_SESSION['account'];
+
+$accountInfo = $db->getValuesForSession($accountId);
+if (!SessionService::isSessionValid($accountInfo['session_secret'])) {
+  http_response_code(403);
+  die('Not logged in');
+}
+
 header('Content-Type: application/json');
 
 $birthdayId = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-$db = new DatabaseConnector();
-$result = $birthdayId && $db->deleteBirthday($_SESSION['account'], $birthdayId);
+$result = $birthdayId && $db->deleteBirthday($accountId, $birthdayId);
 echo json_encode(['success' => $result]);

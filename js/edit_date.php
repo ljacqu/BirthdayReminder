@@ -6,29 +6,32 @@ if (!isset($_SESSION['account'])) {
   die('Not logged in');
 }
 
-if (!isset($_POST['id'])) {
-  http_response_code(400);
-  die('Missing ID');
-}
-
 require '../Configuration.php';
 require '../model/UserPreference.php';
 require '../class/DatabaseConnector.php';
-header('Content-Type: application/json');
+require '../class/SessionService.php';
 
 $accountId = $_SESSION['account'];
-$birthdayId = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
-$date = filter_input(INPUT_POST, 'date', FILTER_UNSAFE_RAW, FILTER_REQUIRE_SCALAR);
 
 $db = new DatabaseConnector();
-
-$newText = '';
-$result = false;
-if ($date) {
-  $dateTime = new DateTime($date);
-  $result = $db->updateBirthdayDate($accountId, $birthdayId, $dateTime);
-  $dateFormat = $db->getPreferences($accountId)->getDateFormat();
-  $newText = $dateTime->format($dateFormat);
+$accountInfo = $db->getValuesForSession($accountId);
+if (!SessionService::isSessionValid($accountInfo['session_secret'])) {
+  http_response_code(403);
+  die('Not logged in');
 }
+
+$birthdayId = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
+$date = filter_input(INPUT_POST, 'date', FILTER_UNSAFE_RAW, FILTER_REQUIRE_SCALAR);
+if (!$birthdayId || !$date) {
+  http_response_code(400);
+  die('Missing ID or date');
+}
+
+header('Content-Type: application/json');
+
+$dateTime = new DateTime($date);
+$result = $db->updateBirthdayDate($accountId, $birthdayId, $dateTime);
+$dateFormat = $db->getPreferences($accountId)->getDateFormat();
+$newText = $dateTime->format($dateFormat);
 
 echo json_encode(['success' => $result, 'newText' => $newText]);

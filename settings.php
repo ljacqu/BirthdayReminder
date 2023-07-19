@@ -23,7 +23,7 @@ if (!$db->birthdayTableExists()) {
   exit;
 }
 
-$accountInfo = $db->getValuesForSession($_SESSION['account']);
+$accountInfo = $db->getValuesForSession($accountId);
 if (!SessionService::isSessionValid($accountInfo['session_secret'])) {
   header('Location: login.php');
   exit;
