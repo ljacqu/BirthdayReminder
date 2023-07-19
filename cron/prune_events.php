@@ -5,6 +5,8 @@ require '../Configuration.php';
 require '../model/EventType.php';
 require '../class/DatabaseConnector.php';
 
+header('Content-Type: text/plain');
+
 if (!empty(Configuration::CRON_SECRET)) {
   if (isset($_SERVER['argv']) && isset($_SERVER['argv'][1]) && is_scalar($_SERVER['argv'][1])) {
     $secret = $_SERVER['argv'][1];

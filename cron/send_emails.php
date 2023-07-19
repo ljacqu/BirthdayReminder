@@ -7,6 +7,8 @@ require '../class/DatabaseConnector.php';
 require '../class/AgeCalculator.php';
 require '../class/Mailer.php';
 
+header('Content-Type: text/plain');
+
 if (!empty(Configuration::CRON_SECRET)) {
   if (isset($_SERVER['argv']) && isset($_SERVER['argv'][1]) && is_scalar($_SERVER['argv'][1])) {
     $secret = $_SERVER['argv'][1];
@@ -31,30 +33,31 @@ if ($lastDailyEvent) {
   $date = $lastDailyEvent['date'];
   if (date('Y-M-d') === date('Y-M-d', strtotime($date))) {
     echo 'Mails have already been generated for today (at ' . $date . ')';
-    if (!isset($_GET['force']) || !Configuration::LOCAL_DEV) {
+    if (!isset($_GET['force'])) {
       exit;
     }
   }
 }
 
-// Look for tomorrow's birthdays
-$upcomingBirthdays = $db->findBirthdaysForDailyMail($tomorrow);
-echo '<br />Found ' . count($upcomingBirthdays) . ' birthdays for tomorrow (date ' . $tomorrow->format('Y-m-d') . ')';
-
-$birthdaysByAccountId = groupByAccountId($upcomingBirthdays);
-echo '<br />Grouped entries to ' . count($birthdaysByAccountId) . ' accounts.';
-$emailSettingsByAccountId = $db->getValuesForEmail(array_keys($birthdaysByAccountId));
-
 $mailer = new Mailer(new AgeCalculator());
 
-echo '<br />Sending emails: ';
+// Look for tomorrow's birthdays
+$upcomingBirthdays = $db->findBirthdaysForDailyMail($tomorrow);
+echo "\nFound " . count($upcomingBirthdays) . ' birthdays for tomorrow (date ' . $tomorrow->format('Y-m-d') . ')';
+
+$birthdaysByAccountId = groupByAccountId($upcomingBirthdays);
+$emailSettingsByAccountId = $db->getValuesForEmail(array_keys($birthdaysByAccountId));
+
+$allMailSuccess = true;
 foreach ($birthdaysByAccountId as $accountId => $birthdays) {
   $emailData = $emailSettingsByAccountId[$accountId];
-  $mailer->sendTomorrowReminder($emailData['email'], $birthdays);
-  echo '*';
+  $allMailSuccess &= $mailer->sendTomorrowReminder($emailData['email'], $birthdays);
 }
 
-echo ' Done.';
+echo "\nSent " . count($birthdaysByAccountId) . ' daily emails.';
+if (!$allMailSuccess) {
+  echo "\n! Errors occurred while sending emails.";
+}
 
 $db->addEvent(EventType::DAILY_MAIL, count($upcomingBirthdays) . ' results; ' . count($birthdaysByAccountId) . ' emails');
 
@@ -63,10 +66,9 @@ $endOfWeek = new DateTime(null, Configuration::getTimeZone());
 $endOfWeek->modify('+7 day');
 $currentWeekDay = date('w');
 $weeklyBirthdays = $db->findBirthdaysForWeeklyMail($tomorrow, $endOfWeek, $currentWeekDay);
-echo '<br />Found ' . count($weeklyBirthdays) . ' birthdays for next week (' . $tomorrow->format('Y-m-d') . ' to ' . $endOfWeek->format('Y-m-d') . ')';
+echo "\n\nFound " . count($weeklyBirthdays) . ' birthdays for next week (' . $tomorrow->format('Y-m-d') . ' to ' . $endOfWeek->format('Y-m-d') . ')';
 
 $birthdaysByAccountId = groupByAccountId($weeklyBirthdays);
-echo '<br />Grouped entries to ' . count($birthdaysByAccountId) . ' accounts.';
 
 $missingAccountIds = array_diff(array_keys($emailSettingsByAccountId), array_keys($birthdaysByAccountId));
 if (!empty($missingAccountIds)) {
@@ -76,15 +78,16 @@ if (!empty($missingAccountIds)) {
   }
 }
 
-echo '<br />Sending emails: ';
-
+$allMailSuccess = true;
 foreach ($birthdaysByAccountId as $accountId => $birthdays) {
   $emailData = $emailSettingsByAccountId[$accountId];
-  $mailer->sendNextWeekReminder($emailData['email'], $birthdays, $emailData['date_format']);
-  echo '*';
+  $allMailSuccess &= $mailer->sendNextWeekReminder($emailData['email'], $birthdays, $emailData['date_format']);
 }
 
-echo ' Done.';
+echo "\nSent " . count($birthdaysByAccountId) . ' weekly emails.';
+if (!$allMailSuccess) {
+  echo "\n! Errors occurred while sending emails.";
+}
 $db->addEvent(EventType::WEEKLY_MAIL, count($weeklyBirthdays) . ' results; ' . count($birthdaysByAccountId) . ' emails');
 
 function groupByAccountId($birthdayEntries) {

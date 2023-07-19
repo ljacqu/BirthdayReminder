@@ -133,7 +133,7 @@ if ($offset === -1) {
     echo '<h2>System overview</h2>';
     echo 'Current time: ' . (new DateTime(null, Configuration::getTimeZone()))->format('Y-m-d, H:i');
     echo '<br />PHP version: ' . PHP_VERSION;
-    echo '<br />Total birthdays: ' . $db->countBirthdays();
+    echo '<br />Total birthday entries: ' . $db->countBirthdays();
 
     echo '<h2>CRON files</h2>';
     $keyAddition = empty(Configuration::CRON_SECRET) ? '' : ' ' . Configuration::CRON_SECRET;

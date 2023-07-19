@@ -4,20 +4,23 @@ class Mailer {
 
   private string $fromAddr;
   private bool $sendEmails;
-  private bool $outputEmails; // for debug
+  private bool $outputEmails;
+  private bool $logMailFailures;
   private bool $useTomorrowTerm;
+
 
   private AgeCalculator $ageCalculator;
 
   function __construct(AgeCalculator $ageCalculator) {
-    $this->fromAddr = Configuration::MAIL_FROM;
-    $this->sendEmails   = strpos(Configuration::MAIL_MODE, 'S') !== false;
-    $this->outputEmails = strpos(Configuration::MAIL_MODE, 'P') !== false;
+    $this->fromAddr        = Configuration::MAIL_FROM;
+    $this->sendEmails      = Configuration::MAIL_SEND;
+    $this->outputEmails    = Configuration::MAIL_PRINT_CONTENTS;
+    $this->logMailFailures = Configuration::MAIL_LOG_FAILURES;
     $this->useTomorrowTerm = Configuration::MAIL_FOR_TOMORROW;
     $this->ageCalculator = $ageCalculator;
   }
 
-  function sendTomorrowReminder($to, $birthdays) {
+  function sendTomorrowReminder(string $to, array $birthdays): bool {
     $now = new DateTime();
     $listOfBirthdays = array_reduce($birthdays, function ($carry, $bd) use ($now) {
       $age = $this->ageCalculator->calculateFutureAge($now, $bd['date']);
@@ -44,10 +47,10 @@ class Mailer {
       $title .= " (" . count($birthdays) . ")";
     }
 
-    $this->sendMail($to, $title, $msg);
+    return $this->sendMail($to, $title, $msg);
   }
 
-  function sendNextWeekReminder($to, $birthdays, $dateFormat) {
+  function sendNextWeekReminder(string $to, array $birthdays, string $dateFormat): bool {
     $now = new DateTime();
 
     $birthdaysByDay = [];
@@ -75,23 +78,24 @@ class Mailer {
     $msg = "Hi! These people have their birthday this coming week:\n\n" . trim($output);
 
     $totalBirthdays = count($birthdays);
-    $this->sendMail($to, "Next week's birthdays ($totalBirthdays)", $msg);
+    return $this->sendMail($to, "Next week's birthdays ($totalBirthdays)", $msg);
   }
 
-  private function sendMail($to, $subject, $message) {
-    $actionWasPerformed = false;
+  private function sendMail(string $to, string $subject, string $message): bool {
     if ($this->outputEmails) {
-      var_dump('Mail to=' . $to . ', subject=' . $subject . ', message=' . $message);
-      $actionWasPerformed = true;
-    }
-    if ($this->sendEmails) {
-      $headers = "From: {$this->fromAddr}";
-      mail($to, $subject, $message, $headers);
-      $actionWasPerformed = true;
+      echo "\n[********** Email debug **********]";
+      echo "\nTo: $to, Subject: $subject";
+      echo "\nMessage: $message\n[********** /Email debug **********]\n";
     }
 
-    if (!$actionWasPerformed) {
-      throw new Error('No mail action is configured');
+    if ($this->sendEmails) {
+      $headers = "From: {$this->fromAddr}";
+      $success = @mail($to, $subject, $message, $headers);
+      if (!$success && $this->logMailFailures) {
+        error_log("Error sending email to $to: " . error_get_last()['message']);
+      }
+      return $success;
     }
+    return true;
   }
 }
