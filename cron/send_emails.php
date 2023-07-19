@@ -1,10 +1,16 @@
 <?php
+session_start();
 
-require 'Configuration.php';
-require './model/EventType.php';
-require './class/DatabaseConnector.php';
-require './class/AgeCalculator.php';
-require './class/Mailer.php';
+require '../Configuration.php';
+require '../model/EventType.php';
+require '../class/DatabaseConnector.php';
+require '../class/AgeCalculator.php';
+require '../class/Mailer.php';
+
+$cronSecret = filter_input(INPUT_GET, 'key', FILTER_UNSAFE_RAW, FILTER_REQUIRE_SCALAR);
+if ($cronSecret !== Configuration::CRON_SECRET && !empty(Configuration::CRON_SECRET)) {
+  die('Invalid or missing key');
+}
 
 $tomorrow = new DateTime(null, Configuration::getTimeZone());
 if (Configuration::MAIL_FOR_TOMORROW) {

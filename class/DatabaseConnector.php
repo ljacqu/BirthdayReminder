@@ -403,6 +403,16 @@ class DatabaseConnector {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
+  function removeEventsBefore(DateTime $date) {
+    $query = 'delete from br_event where date < :date';
+    $dateStr = $date->format('Y-m-d');
+
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':date', $dateStr);
+    $stmt->execute();
+    return $stmt->rowCount();
+  }
+
   /* ***********
    * Internal
    * *********** */

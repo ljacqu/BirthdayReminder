@@ -13,6 +13,8 @@ final class EventType {
   const EMAIL_CHANGE = 'account.emailChange';
   const RESET_FAILED_LOGINS = 'account.resetFailedLogins';
 
+  const EVENTS_PRUNE = 'events.prune';
+
   private function __construct() {
   }
 

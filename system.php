@@ -134,10 +134,17 @@ if ($offset === -1) {
     echo 'Current time: ' . (new DateTime(null, Configuration::getTimeZone()))->format('Y-m-d, H:i');
     echo '<br />PHP version: ' . PHP_VERSION;
     echo '<br />Total birthdays: ' . $db->countBirthdays();
+
+    echo '<h2>CRON files</h2>';
+    $keyAddition = empty(Configuration::CRON_SECRET) ? '' : '?key=' . Configuration::CRON_SECRET;
+
+    echo 'Set up CRON jobs to send out emails and clear out events occasionally. Examples:<ul>';
+    echo '<li>Send emails every day at 03:19 AM: <code>19 3 * * * php PATH/cron/send_emails.php' . $keyAddition . '</code></li>';
+    echo '<li>Prune events every Thursday at 11:14 PM: <code>14 23 * * 4 php PATH/cron/clear_events.php' . $keyAddition . '</code></li>';
+    echo '</ul>';
   }
 }
-
-
 ?>
+
 <script src="./js/unlock.js" type="text/javascript"></script>
 </body></html>
