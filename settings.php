@@ -69,6 +69,23 @@ if (isset($_POST['weekly'])) {
   echo '<h2>Settings updated</h2>Thanks! Your preferences have been updated.';
 
 
+} else if (isset($_POST['emailnew'])) {
+  $newEmail     = filter_input(INPUT_POST, 'emailnew',  FILTER_VALIDATE_EMAIL);
+  $confirmEmail = filter_input(INPUT_POST, 'emailconf', FILTER_VALIDATE_EMAIL);
+
+  if (!$newEmail) {
+    echo '<h2>Error</h2>Your email could not be updated. Please provide a valid email address.';
+  } else if ($newEmail !== $confirmEmail) {
+    echo '<h2>Error</h2>Your email could not be updated. The confirmation field did not match.';
+  } else if ($db->findAccountIdByEmail($newEmail) !== null) {
+    echo '<h2>Error</h2>The email address is already in use by another account.';
+  } else {
+    $db->updateEmail($accountId, $newEmail);
+    $db->addEvent(EventType::EMAIL_CHANGE, $_SERVER['REMOTE_ADDR'] . ';' . $newEmail, $accountId);
+    echo '<h2>Email updated</h2>Your email address has been updated!';
+  }
+
+
 } else if (isset($_POST['current'])) { // password change
   require './class/AccountService.php';
   $accountService = new AccountService($db);
@@ -134,12 +151,27 @@ $dateOptions = array_map(function ($opt) {
 }, DateFormat::getAllFormats());
 printOptions($dateOptions, $settings->getDateFormat());
 
+$currentEmail = $db->fetchEmail($accountId);
+
 echo <<<HTML
 </select></td>
     </tr>
     <tr><td colspan="2"><input type="submit" value="Update settings" /></td></tr>
   </table>
+</form>
 
+<h2>Change email</h2>
+<p>Change your email here. When you log in in the future, make sure to use the new email address.</p>
+<form method="post" action="settings.php">
+<table>
+ <tr><td>Current email:</td>
+     <td><b>{$currentEmail}</b></td></tr>
+ <tr><td><label for="emailnew">New email:</label></td>
+     <td><input type="email" id="emailnew" name="emailnew" minlength="6" /></td></tr>
+ <tr><td><label for="emailconf">Confirm email:</label></td>
+     <td><input type="email" id="emailconf" name="emailconf" minlength="6" /></td></tr>
+ <tr><td colspan="2"><input type="submit" value="Update email" /></td></tr>
+</table>
 </form>
 
 <h2>Change password</h2>

@@ -220,6 +220,22 @@ class DatabaseConnector {
     return null;
   }
 
+  function fetchEmail($id) {
+    $query = 'select email from br_account where id = :id';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':id', $id);
+    $stmt->execute();
+    return $stmt->fetch()[0];
+  }
+
+  function updateEmail($id, $email) {
+    $query = 'update br_account set email = :email where id = :id';
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':email', $email);
+    $stmt->bindParam(':id', $id);
+    $stmt->execute();
+  }
+
   function fetchMinAccountId() {
     $stmt = $this->conn->query('select min(id) from br_account');
     $stmt->execute();

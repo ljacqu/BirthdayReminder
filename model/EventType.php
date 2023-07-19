@@ -10,6 +10,7 @@ final class EventType {
   const LOGIN_LOCKED = 'login.locked';
 
   const PASSWORD_CHANGE = 'account.pwdChange';
+  const EMAIL_CHANGE = 'account.emailChange';
   const RESET_FAILED_LOGINS = 'account.resetFailedLogins';
 
   private function __construct() {
