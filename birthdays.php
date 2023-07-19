@@ -83,12 +83,15 @@ echo '<h2>Birthdays</h2>';
 if (empty($entries)) {
   echo "You haven't saved any birthdays.";
 } else {
-  echo '<table class="bordered"><tr>
-          <th>Name</th>
-          <th>Date</th>
-          <th><acronym title="' . htmlspecialchars($flagTextInfo['help']) . '">' . $flagTextInfo['text'] . '</acronym></th>
-          <th>&nbsp;</th>
-        </tr>';
+  echo '<table class="bordered">
+    <tr>
+      <th>Name</th>
+      <th>Date</th>';
+  if ($flagTextInfo) {
+    echo '<th><acronym title="' . htmlspecialchars($flagTextInfo['help']) . '">' . $flagTextInfo['text'] . '</acronym></th>';
+  }
+  echo '<th>&nbsp;</th>
+    </tr>';
   $alt = true;
 
   foreach ($entries as $entry) {
@@ -97,10 +100,12 @@ if (empty($entries)) {
 
     echo '<tr id="br' . $id . '" ' . ($alt ? 'class="alt"' : '') . ' data-id="' . htmlspecialchars($entry['id']) . '">
       <td class="dbleditname">' . htmlspecialchars($entry['name']) . '</td>
-      <td class="dbleditdate" data-date="' . $entry['date'] .'">' . date($settings->getDateFormat(), strtotime($entry['date'])) . '</td>
-      <td style="text-align: center"><input disabled="disabled" type="checkbox" class="flag" ' . $flagChecked . ' />
-      <td><a href="?" class="delete">Delete</a></td>
-    </tr>';
+      <td class="dbleditdate" data-date="' . $entry['date'] .'">' . date($settings->getDateFormat(), strtotime($entry['date'])) . '</td>';
+    if ($flagTextInfo) {
+      echo '<td style="text-align: center"><input disabled="disabled" type="checkbox" class="flag" ' . $flagChecked . ' /></td>';
+    }
+    echo '<td><a href="?" class="delete">Delete</a></td>
+      </tr>';
     $alt = !$alt;
   }
   echo '</table>';

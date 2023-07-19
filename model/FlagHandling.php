@@ -21,7 +21,6 @@ final class FlagHandling {
     $ignoreCount = 0;
     $filterCount = 0;
     $dailyFlagUsed = false;
-    $weeklyFlagUsed = false;
 
     if ($pref->getDailyMail()) {
       if ($pref->getDailyFlag() === 'ignore') {
@@ -36,14 +35,14 @@ final class FlagHandling {
     if ($pref->getWeeklyMail() != -1) {
       if ($pref->getWeeklyFlag() === 'ignore') {
         ++$ignoreCount;
-        $weeklyFlagUsed = true;
       } else if ($pref->getWeeklyFlag() === 'filter') {
         ++$filterCount;
-        $weeklyFlagUsed = true;
       }
     }
 
-    if ($ignoreCount + $filterCount === 1) {
+    if ($ignoreCount + $filterCount === 0) {
+      return null;
+    } else if ($ignoreCount + $filterCount === 1) {
       $verb = ($ignoreCount > 0) ? 'Ignore' : 'Include';
       $mailType = $dailyFlagUsed ? 'daily' : 'weekly';
       return [
@@ -56,13 +55,10 @@ final class FlagHandling {
         'text' => "$verb in mails",
         'help' => 'Defines if the birthday should be included in your mails (flag behavior can be changed in settings)'
       ];
-    } else {
-      $help = ($ignoreCount + $filterCount) > 0
-        ? 'Ignored/included in mails as per your settings.'
-        : 'You can use this as whitelist or blacklist for emails. Configurable in the settings.';
+    } else { // $ignoreCount = 1 & $filterCount = 1
       return [
         'text' => 'Flag',
-        'help' => $help
+        'help' => 'Ignored/included in mails as per your settings.'
       ];
     }
   }
