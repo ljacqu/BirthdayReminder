@@ -45,7 +45,7 @@ $mailer = new Mailer(new AgeCalculator());
 
 // Look for tomorrow's birthdays
 $upcomingBirthdays = $db->findBirthdaysForDailyMail($tomorrow);
-echo "\nFound " . count($upcomingBirthdays) . ' birthdays for tomorrow (date ' . $tomorrow->format('Y-m-d') . ')';
+outputIfEnabled(0x001, "Found " . count($upcomingBirthdays) . ' birthdays for tomorrow (date ' . $tomorrow->format('Y-m-d') . ')');
 
 $birthdaysByAccountId = groupByAccountId($upcomingBirthdays);
 $emailSettingsByAccountId = $db->getValuesForEmail(array_keys($birthdaysByAccountId));
@@ -56,9 +56,9 @@ foreach ($birthdaysByAccountId as $accountId => $birthdays) {
   $allMailSuccess &= $mailer->sendTomorrowReminder($emailData['email'], $birthdays);
 }
 
-echo "\nSent " . count($birthdaysByAccountId) . ' daily emails.';
+outputIfEnabled(0x002, "Sent " . count($birthdaysByAccountId) . ' daily emails.');
 if (!$allMailSuccess) {
-  echo "\n! Errors occurred while sending emails.";
+  outputIfEnabled(0x004, "! Errors occurred while sending emails.");
 }
 
 $db->addEvent(EventType::DAILY_MAIL, count($upcomingBirthdays) . ' results; ' . count($birthdaysByAccountId) . ' emails');
@@ -68,7 +68,7 @@ $endOfWeek = new DateTime(null, Configuration::getTimeZone());
 $endOfWeek->modify('+7 day');
 $currentWeekDay = date('w');
 $weeklyBirthdays = $db->findBirthdaysForWeeklyMail($tomorrow, $endOfWeek, $currentWeekDay);
-echo "\n\nFound " . count($weeklyBirthdays) . ' birthdays for next week (' . $tomorrow->format('Y-m-d') . ' to ' . $endOfWeek->format('Y-m-d') . ')';
+outputIfEnabled(0x010, "Found " . count($weeklyBirthdays) . ' birthdays for next week (' . $tomorrow->format('Y-m-d') . ' to ' . $endOfWeek->format('Y-m-d') . ')');
 
 $birthdaysByAccountId = groupByAccountId($weeklyBirthdays);
 
@@ -86,9 +86,9 @@ foreach ($birthdaysByAccountId as $accountId => $birthdays) {
   $allMailSuccess &= $mailer->sendNextWeekReminder($emailData['email'], $birthdays, $emailData['date_format']);
 }
 
-echo "\nSent " . count($birthdaysByAccountId) . ' weekly emails.';
+outputIfEnabled(0x020, "Sent " . count($birthdaysByAccountId) . ' weekly emails.');
 if (!$allMailSuccess) {
-  echo "\n! Errors occurred while sending emails.";
+  outputIfEnabled(0x040, "! Errors occurred while sending emails.");
 }
 $db->addEvent(EventType::WEEKLY_MAIL, count($weeklyBirthdays) . ' results; ' . count($birthdaysByAccountId) . ' emails');
 
@@ -104,3 +104,8 @@ function groupByAccountId($birthdayEntries) {
   return $birthdaysByAccount;
 }
 
+function outputIfEnabled($flag, $message) {
+  if (($flag & Configuration::MAIL_SCRIPT_OUTPUTS) != 0) {
+    echo "\n[" . date('H:i:s') . "] $message";
+  }
+}

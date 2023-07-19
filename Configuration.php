@@ -25,7 +25,7 @@ class Configuration {
    */
   const MAIL_FROM = 'birthdays@example.org';
   /** If false, no emails are ever actually sent. Useful for local development. */
-  const MAIL_SEND = false;
+  const MAIL_SEND = true;
   /** If true, the contents of all emails are also output on the page sending them. Useful for local development. */
   const MAIL_PRINT_CONTENTS = false;
 
@@ -38,7 +38,14 @@ class Configuration {
    * send_emails.php daily at 11 PM or so. If you run the job at 3 AM, this should be false to get
    * the same day's birthdays per mail.
    */
-  const MAIL_FOR_TOMORROW = true;
+  const MAIL_FOR_TOMORROW = false;
+
+  /**
+   * Every message output in send_emails.php has a bit flag associated to it that can be enabled or
+   * disabled here. Use ~0 to enable all; use 0 to disable all output. See send_emails.php for the
+   * values. Open a GitHub issue if you need assistance: https://github.com/ljacqu/BirthdayReminder/issues
+   */
+  const MAIL_SCRIPT_OUTPUTS = ~0;
 
 
   // ------
