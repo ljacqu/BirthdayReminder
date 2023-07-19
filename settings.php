@@ -13,6 +13,7 @@ require './model/DateFormat.php';
 require './model/FlagHandling.php';
 require './model/UserPreference.php';
 require './class/DatabaseConnector.php';
+require './class/SessionService.php';
 
 $db = new DatabaseConnector();
 $accountId = $_SESSION['account'];
@@ -23,6 +24,12 @@ if (!$db->birthdayTableExists()) {
 }
 
 $accountInfo = $db->getValuesForSession($_SESSION['account']);
+if (!SessionService::isSessionValid($accountInfo['session_secret'])) {
+  header('Location: login.php');
+  exit;
+}
+
+
 require './html/header.php';
 Header::outputHeader(true, 'Settings', $accountInfo);
 
@@ -72,7 +79,8 @@ if (isset($_POST['weekly'])) {
 
   $resultOrError = $accountService->handlePasswordChange($accountId, $currentPwd, $newPwd, $confirmPwd);
   if ($resultOrError === true) {
-    echo '<h2>Password updated</h2>Your password has been updated!';
+    echo '<h2>Password updated</h2>Your password has been updated! <b>Please log in again.</b> <a href="login.php">Login</a></body></html>';
+    exit;
   } else {
     echo '<h2>Error</h2>Your password could not be updated: ' . $resultOrError . '.';
   }
@@ -135,6 +143,8 @@ echo <<<HTML
 </form>
 
 <h2>Change password</h2>
+<p>Note: Changing password will invalidate all existing sessions, and you will be required to log in again.</p>
+
 <form method="post" action="settings.php">
 <table>
  <tr><td><label for="current">Current password:</label></td>
@@ -154,6 +164,6 @@ function printOptions($options, $selectedValue) {
     echo '<option value="' . $opt['value'] . '" ' . $selected . '>' . $opt['label'] . '</option>';
   }
 }
-
 ?>
+
 </body></html>

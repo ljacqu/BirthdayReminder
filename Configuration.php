@@ -19,6 +19,7 @@ class Configuration {
   const MAIL_FOR_TOMORROW = false;
   const TIME_ZONE = '';
   const LOCAL_DEV = true;
+  const SESSION_TIMEOUT_SECONDS = 2 * 24 * 3600;
 
 
   private function __construct() {

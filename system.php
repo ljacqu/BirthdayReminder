@@ -11,6 +11,7 @@ require './model/EventType.php';
 require './model/ValidationException.php';
 require './class/DatabaseConnector.php';
 require './class/AccountService.php';
+require './class/SessionService.php';
 
 $db = new DatabaseConnector();
 if (!$db->birthdayTableExists()) {
@@ -19,6 +20,10 @@ if (!$db->birthdayTableExists()) {
 }
 
 $accountInfo = $db->getValuesForSession($_SESSION['account']);
+if (!SessionService::isSessionValid($accountInfo['session_secret'])) {
+  header('Location: login.php');
+  exit;
+}
 
 if (!$accountInfo || !$accountInfo['is_admin']) {
   Header('Location: index.php');

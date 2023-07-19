@@ -14,6 +14,7 @@ require './model/FlagHandling.php';
 require './model/UserPreference.php';
 require './class/DatabaseConnector.php';
 require './class/AgeCalculator.php';
+require './class/SessionService.php';
 
 $db = new DatabaseConnector();
 $accountId = $_SESSION['account'];
@@ -23,7 +24,12 @@ if (!$db->birthdayTableExists()) {
   exit;
 }
 
-$accountInfo = $db->getValuesForSession($_SESSION['account']);
+$accountInfo = $db->getValuesForSession($accountId);
+if (!SessionService::isSessionValid($accountInfo['session_secret'])) {
+  header('Location: login.php');
+  exit;
+}
+
 require './html/header.php';
 Header::outputHeader(true, 'Birthdays', $accountInfo);
 

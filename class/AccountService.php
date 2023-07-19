@@ -3,6 +3,7 @@
 class AccountService {
 
   const MIN_PASS_LENGTH = 6;
+  private const SESSION_SECRET_LENGTH = 31;
 
   private DatabaseConnector $db;
 

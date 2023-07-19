@@ -9,10 +9,16 @@ if (!isset($_SESSION['account'])) {
 require 'Configuration.php';
 require './model/EventType.php';
 require './class/DatabaseConnector.php';
+require './class/SessionService.php';
 
 $db = new DatabaseConnector();
 $accountId = $_SESSION['account'];
-$accountInfo = $db->getValuesForSession($_SESSION['account']);
+$accountInfo = $db->getValuesForSession($accountId);
+
+if (!SessionService::isSessionValid($accountInfo['session_secret'])) {
+  header('Location: login.php');
+  exit;
+}
 
 if (!$db->birthdayTableExists()) {
   header('Location: init.php');

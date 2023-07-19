@@ -3,6 +3,7 @@
 class DatabaseConnector {
 
   const MAX_FAILED_LOGINS = 10;
+  private const SESSION_SECRET_LENGTH = 31;
 
   private $conn;
   private $name;
@@ -189,12 +190,15 @@ class DatabaseConnector {
    * ************* */
 
   function addAccount($email, $pwdHash, $isAdmin) {
-    $query = "insert into br_account (email, created, password, failed_logins, is_admin, daily_mail, weekly_mail, date_format)
-                              values (:email, now(), :password,             0,   :admin,           1,          0,     'd.m.Y')";
+    $query = "insert into br_account (email, created, password, failed_logins, is_admin, daily_mail, weekly_mail, date_format, session_secret)
+                              values (:email, now(), :password,             0,   :admin,           1,          0,     'd.m.Y', :sessionSecret)";
+    $sessionSecret = self::createSessionSecret();
+
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':email', $email);
     $stmt->bindParam(':password', $pwdHash);
     $stmt->bindParam(':admin', $isAdmin);
+    $stmt->bindParam(':sessionSecret', $sessionSecret);
     $stmt->execute();
   }
 
@@ -218,6 +222,13 @@ class DatabaseConnector {
 
   function fetchMinAccountId() {
     $stmt = $this->conn->query('select min(id) from br_account');
+    $stmt->execute();
+    return $stmt->fetch()[0];
+  }
+
+  function fetchSessionSecret($id) {
+    $stmt = $this->conn->prepare('select session_secret from br_account where id = :id');
+    $stmt->bindParam(':id', $id);
     $stmt->execute();
     return $stmt->fetch()[0];
   }
@@ -258,10 +269,13 @@ class DatabaseConnector {
   }
 
   function updatePassword($id, $passwordHash) {
-    $query = 'update br_account set password = :password where id = :id';
+    $query = 'update br_account set password = :password, session_secret = :sessionSecret where id = :id';
+    $sessionSecret = self::createSessionSecret();
+
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':id', $id);
     $stmt->bindParam(':password', $passwordHash);
+    $stmt->bindParam(':sessionSecret', $sessionSecret);
     $stmt->execute();
   }
 
@@ -320,7 +334,7 @@ class DatabaseConnector {
   }
 
   function getValuesForSession($accountId) {
-    $query = 'select is_admin from br_account where id = :id';
+    $query = 'select session_secret, is_admin from br_account where id = :id';
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam(':id', $accountId);
     $stmt->execute();
@@ -383,6 +397,7 @@ class DatabaseConnector {
       password varchar(255) not null,
       failed_logins int not null,
       last_login timestamp,
+      session_secret varchar(31) not null,
       is_admin bool not null,
       daily_mail bool not null,
       daily_flag varchar(31) not null,
@@ -415,5 +430,15 @@ class DatabaseConnector {
       primary key (id),
       foreign key (account_id) references br_account(id)
       ) ENGINE = InnoDB');
+  }
+
+  private static function createSessionSecret() {
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $charactersLength = strlen($characters);
+    $randomString = '';
+    for ($i = 0; $i < self::SESSION_SECRET_LENGTH; $i++) {
+      $randomString .= $characters[random_int(0, $charactersLength - 1)];
+    }
+    return $randomString;
   }
 }
