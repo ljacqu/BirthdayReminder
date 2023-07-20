@@ -117,12 +117,22 @@ class DatabaseConnector {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
-  function findBirthdaysByAccountId($accountId, $limit=null) {
-    $limitQuery = $limit ? "limit $limit" : '';
+  function findBirthdaysByAccountId($accountId, $limit=null, $offset=null, $sort=null) {
+    $limitQuery = '';
+    if ($offset) {
+      if (!$limit) {
+        throw new Exception('Offset may not be provided without limit');
+      }
+      $limitQuery = "limit $limit offset $offset";
+    } else if ($limit) {
+      $limitQuery = "limit $limit";
+    }
+    $sortQuery = $sort ?? "date_2020, year(date) desc";
+
     $query = "select id, name, date, flag
               from br_birthday
               where account_id = :accountId
-              order by date_2020, year(date) desc $limitQuery";
+              order by $sortQuery $limitQuery";
     $stmt = $this->conn->prepare($query);
     $stmt->bindParam('accountId', $accountId);
     $stmt->execute();

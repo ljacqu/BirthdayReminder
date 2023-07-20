@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 
 if (!isset($_SESSION['account'])) {
@@ -81,7 +81,9 @@ if (isset($_POST['name']) && isset($_POST['date'])) {
 }
 
 $limit = empty($form_data) ? null : 10;
-$entries = $db->findBirthdaysByAccountId($_SESSION['account'], $limit);
+$sort = empty($form_data) ? getSortColumn() : null;
+
+$entries = $db->findBirthdaysByAccountId($_SESSION['account'], $limit, null, $sort ? $sort['sql'] : null);
 $settings = $db->getPreferences($_SESSION['account']);
 $flagTextInfo = FlagHandling::getFlagText($settings);
 
@@ -89,15 +91,28 @@ echo '<h2>Birthdays</h2>';
 if (empty($entries)) {
   echo "You haven't saved any birthdays.";
 } else {
-  echo '<table class="bordered">
-    <tr>
-      <th>Name</th>
-      <th>Date</th>';
-  if ($flagTextInfo) {
-    echo '<th><acronym title="' . htmlspecialchars($flagTextInfo['help']) . '">' . $flagTextInfo['text'] . '</acronym></th>';
+  echo '<table class="bordered"><tr>';
+  $columns = createColumnDefinitions($flagTextInfo, $sort);
+  foreach ($columns as $k => $col) {
+    echo '<th>';
+    if (isset($col['title'])) {
+      echo '<acronym title="' . htmlspecialchars($col['title']) . '">';
+    }
+
+    echo empty($col['nextsort'])
+      ? $col['text']
+      : '<a href="?sort=' . trim($col['nextsort']) . '">' . $col['text'] . '</a>';
+
+    if (isset($col['title'])) {
+      echo '</acronym>';
+    }
+    if (isset($col['sortsymbol'])) {
+      echo ' ' . $col['sortsymbol'];
+    }
+    echo '</th>';
   }
-  echo '<th>&nbsp;</th>
-    </tr>';
+  echo '</tr>';
+
   $alt = true;
 
   foreach ($entries as $entry) {
@@ -115,6 +130,63 @@ if (empty($entries)) {
     $alt = !$alt;
   }
   echo '</table>';
+}
+
+function getSortColumn() {
+  $sort = filter_input(INPUT_GET, 'sort', FILTER_UNSAFE_RAW, FILTER_REQUIRE_SCALAR);
+  switch ($sort) {
+    case 'n':
+      return ['sql' => 'name', 'param' => 'n'];
+    case 'nd':
+      return ['sql' => 'name desc', 'param' => 'nd'];
+    case 'd':
+    default: // <-- default
+      return ['sql' => 'date_2020, year(date) desc', 'param' => 'd'];
+    case 'dd':
+      return ['sql' => 'date_2020 desc, year(date) asc', 'param' => 'dd'];
+    case 'c': // complete date
+      return ['sql' => 'date', 'param' => 'c'];
+    case 'cd':
+      return ['sql' => 'date desc', 'param' => 'cd'];
+    case 'f':
+      return ['sql' => 'flag', 'param' => 'f'];
+    case 'fd':
+      return ['sql' => 'flag desc', 'param' => 'fd'];
+  }
+}
+
+function createColumnDefinitions($flagTextInfo, $sort) {
+  $columns = [    
+    'name' => ['text' => 'Name', 'sort' => ['n', 'nd', ' ']],
+    'date' => ['text' => 'Date', 'sort' => ['d', 'dd', 'c', 'cd']]
+  ];
+  if ($flagTextInfo) {
+    $columns['flag'] = ['text' => $flagTextInfo['text'], 'title' => $flagTextInfo['help'], 'sort' => ['fd', 'f', ' ']];
+  }
+  $columns['del'] = ['text' => '', 'sort' => []];
+  
+  foreach ($columns as &$col) {
+    $key = $sort ? array_search($sort['param'], $col['sort'], true) : false;
+    if ($key !== false) {
+      $nextKey = ++$key;
+      if ($nextKey >= count($col['sort'])) {
+        $nextKey = 0;
+      }
+      $col['nextsort'] = $col['sort'][$nextKey];
+      
+      if ($sort['param'] === 'c') {
+        $col['sortsymbol'] = '⇈';
+      } else if ($sort['param'] === 'cd') {
+        $col['sortsymbol'] = '⇊';
+      } else {
+        $col['sortsymbol'] = (strlen($sort['param']) === 2) ? '↓' : '↑';  
+      }
+    } else {
+      $col['nextsort'] = empty($col['sort']) ? '' : $col['sort'][0];
+    }
+  }
+
+  return $columns;
 }
 
 // Replace $n with name, $d with date, $c for a CSS class
