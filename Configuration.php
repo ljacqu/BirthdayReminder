@@ -21,7 +21,7 @@ class Configuration {
   // ------
 
   /**
-   * When emails are sent to users, from which email should it be sent from?
+   * When emails are sent to users, from which email should it be sent?
    */
   const MAIL_FROM = 'birthdays@example.org';
   /** If false, no emails are ever actually sent. Useful for local development. */

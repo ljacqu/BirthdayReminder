@@ -2,7 +2,7 @@
 
 class AgeCalculator {
 
-  function calculateFutureAge(DateTime $now, string $futureBirthday) {
+  function calculateFutureAge(DateTime $now, string $futureBirthday): int {
     $nowYear   = $now->format('Y');
     $nowMonth  = $now->format('m');
     $then = strtotime($futureBirthday);
@@ -16,18 +16,14 @@ class AgeCalculator {
     return $age;
   }
 
-  function toUpcomingBirthdayYear(DateTime $now, string $futureBirthday) {
-    $nowYear   = $now->format('Y');
-    $nowMonth  = $now->format('m');
+  function toUpcomingBirthdayYear(DateTime $now, string $futureBirthday): DateTime {
+    $nowMonth = $now->format('m');
     $upcomingBirthday = new DateTime($futureBirthday);
     $upcomingMonth = $upcomingBirthday->format('m');
 
-    $upcomingYear = $nowYear;
     if ($nowMonth === '12' && $upcomingMonth === '01') {
-      ++$upcomingYear;
+      $upcomingBirthday->modify('+1 year');
     }
-    
-    // This seems to also work with leap days
-    return new DateTime($upcomingYear . $upcomingBirthday->format('-m-d'));
+    return $upcomingBirthday;
   }
 }

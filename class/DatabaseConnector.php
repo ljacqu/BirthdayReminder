@@ -36,55 +36,52 @@ class DatabaseConnector {
    * Birthdays
    * ************ */
 
-  function findBirthdaysForDailyMail(DateTime $date) {
-    $date2020 = '2020-' . $date->format('m-d');
+  function findBirthdaysForDailyMail(DateTime $minIncl, DateTime $maxExcl) {
+    $min2020Incl = '2020-' . $minIncl->format('m-d');
+    $max2020Excl = '2020-' . $maxExcl->format('m-d');
 
     $query = 'select account_id, name, date
               from br_birthday
               inner join br_account
                 on br_account.id = br_birthday.account_id
-              where date_2020 = :date
+              where date_2020 >= :min2020Incl and date_2020 < :max2020Excl
                 and br_account.daily_mail = true
                 and NOT (br_account.daily_flag = "ignore" AND br_birthday.flag = true
                          OR br_account.daily_flag = "filter" AND br_birthday.flag = false)
               order by account_id, date_2020, date desc';
     $stmt = $this->conn->prepare($query);
-    $stmt->bindParam(':date', $date2020);
+    $stmt->bindParam(':min2020Incl', $min2020Incl);
+    $stmt->bindParam(':max2020Excl', $max2020Excl);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
-  function findBirthdaysForWeeklyMail(DateTime $from, DateTime $to, $weekday) {
-    $from1 = '2020-' . $from->format('m-d');
-    $to1   = '2020-' .   $to->format('m-d');
-    $from2 = $from1;
-    $to2   = $to1;
+  function findBirthdaysForWeeklyMail(DateTime $fromIncl, DateTime $toExcl, $weekday) {
+    $from2020Incl = '2020-' . $fromIncl->format('m-d');
+    $to2020Excl   = '2020-' . $toExcl->format('m-d');
 
-    // If we have something like from1=2020-12-29, to1=2020-01-04, need to use two intervals!
-    if ($from->format('m') === '12' && $to->format('m') === '01') {
-      $to2   = $to1;
-      $to1   = '2020-12-31';
-      $from2 = '2020-01-01';
+    // If we have something like from=2020-12-29, to=2020-01-04, need to use two intervals!
+    if ($fromIncl->format('m') === '12' && $toExcl->format('m') === '01') {
+      // Example:   (date_2020 between '2020-12-29'    and '2020-12-31' OR (date_2020 >= '2020-01-01' and date_2020 < '2020-01-05'))
+      $dateQuery = "date_2020 between '$from2020Incl' and '2020-12-31' OR (date_2020 >= '2020-01-01' and date_2020 < '$to2020Excl')";
+    } else {
+      $dateQuery = "date_2020 >= '$from2020Incl' AND date_2020 < '$to2020Excl'";
     }
 
-    $query = 'select account_id, name, date
+    $query = "select account_id, name, date
               from br_birthday
               inner join br_account
                 on br_account.id = br_birthday.account_id
-              where (date_2020 between :from1 and :to1
-                     or date_2020 between :from2 and :to2)
+              where ($dateQuery)
                 and br_account.weekly_mail = :weekday
-                and NOT (br_account.weekly_flag = "ignore" AND br_birthday.flag = true
-                         OR br_account.weekly_flag = "filter" AND br_birthday.flag = false)
-              order by case when month(date_2020) < month(:from1) then 1 else 0 end,
+                and NOT (br_account.weekly_flag = 'ignore' AND br_birthday.flag = true
+                         OR br_account.weekly_flag = 'filter' AND br_birthday.flag = false)
+              order by case when month(date_2020) < month(:from) then 1 else 0 end,
                        month(date_2020),
                        day(date_2020),
-                       year(date) desc';
+                       year(date) desc";
     $stmt = $this->conn->prepare($query);
-    $stmt->bindParam(':from1', $from1);
-    $stmt->bindParam(':to1', $to1);
-    $stmt->bindParam(':from2', $from2);
-    $stmt->bindParam(':to2', $to2);
+    $stmt->bindParam(':from', $from2020Incl);
     $stmt->bindParam(':weekday', $weekday);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);

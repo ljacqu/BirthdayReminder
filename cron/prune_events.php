@@ -27,6 +27,6 @@ $db = new DatabaseConnector();
 $eventsDeleted = $db->removeEventsBefore($eventsMinDate);
 
 if ($eventsDeleted > 0) {
-  $db->addEvent(EventType::EVENTS_PRUNE, $eventsDeleted . ' events (cut-off date: ' . $eventsMinDate->format('Y-m-d, H:i') . ')');
+  $db->addEvent(EventType::EVENTS_PRUNE, $eventsDeleted . ' events (cut-off date: ' . $eventsMinDate->format('Y-m-d, H:i') . ')', $_SESSION['account'] ?? null);
 }
 echo 'Removed ' . $eventsDeleted . ' events';
