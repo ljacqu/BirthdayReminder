@@ -82,8 +82,8 @@ class Mailer {
   }
 
   function sendPasswordResetEmail(string $to, string $token): bool {
-    $selfLink = empty(Configuration::MAIL_LINK_TO_RESET_PAGE) 
-      ?? ($_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . '/' . $_SERVER['PHP_SELF']);
+    $selfLink = Configuration::MAIL_LINK_TO_RESET_PAGE
+      ?: ($_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['PHP_SELF']);
 
     $expirationHours = AccountService::RESET_TOKEN_MAX_AGE_HOURS;
     $message = "Hello,
