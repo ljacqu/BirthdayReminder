@@ -51,18 +51,26 @@ if (empty($entries)) {
     </tr>';
 
   $alt = true;
+  $todayMonthDay = date('m-d');
   foreach ($entries as $entry) {
     $id = htmlspecialchars($entry['id']);
     $flagChecked = $entry['flag'] ? 'checked="checked"' : '';
+    $classes = [];
+    if (date('m-d', strtotime($entry['date'])) === $todayMonthDay) {
+      $classes[] = 'today';
+    }
+    if ($alt) {
+      $classes[] = 'alt';
+    }
 
-    echo '<tr id="br' . $id . '" ' . ($alt ? 'class="alt"' : '') . ' data-id="' . htmlspecialchars($entry['id']) . '">
+    echo '<tr id="br' . $id . '" class="' . implode(' ', $classes) . '" data-id="' . htmlspecialchars($entry['id']) . '">
       <td>' . htmlspecialchars($entry['name']) . '</td>
       <td>' . date($settings->getDateFormat(), strtotime($entry['date'])) . '</td>
       <td style="text-align: right">' . $ageCalculator->calculateFutureAge($from, $entry['date']) . '</td>';
     if ($flagTextInfo) {
       echo '<td style="text-align: center"><input disabled="disabled" type="checkbox" class="flag" ' . $flagChecked . ' />';
     }
-    echo '<td><a href="?" class="delete">Delete</a></td>
+    echo '<td><a href="#" class="delete internal">Delete</a></td>
     </tr>';
     $alt = !$alt;
   }

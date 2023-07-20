@@ -101,7 +101,7 @@ if (empty($entries)) {
 
     echo empty($col['nextsort'])
       ? $col['text']
-      : '<a href="?sort=' . trim($col['nextsort']) . '">' . $col['text'] . '</a>';
+      : '<a href="?sort=' . trim($col['nextsort']) . '" class="internal">' . $col['text'] . '</a>';
 
     if (isset($col['title'])) {
       echo '</acronym>';
@@ -125,7 +125,7 @@ if (empty($entries)) {
     if ($flagTextInfo) {
       echo '<td style="text-align: center"><input disabled="disabled" type="checkbox" class="flag" ' . $flagChecked . ' /></td>';
     }
-    echo '<td><a href="?" class="delete">Delete</a></td>
+    echo '<td><a href="#" class="delete internal">Delete</a></td>
       </tr>';
     $alt = !$alt;
   }
@@ -175,9 +175,9 @@ function createColumnDefinitions($flagTextInfo, $sort) {
       $col['nextsort'] = $col['sort'][$nextKey];
       
       if ($sort['param'] === 'c') {
-        $col['sortsymbol'] = '⇈';
+        $col['sortsymbol'] = '↑↑';
       } else if ($sort['param'] === 'cd') {
-        $col['sortsymbol'] = '⇊';
+        $col['sortsymbol'] = '↓↓';
       } else {
         $col['sortsymbol'] = (strlen($sort['param']) === 2) ? '↓' : '↑';  
       }

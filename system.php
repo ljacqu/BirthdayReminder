@@ -60,13 +60,16 @@ if (empty($events)) {
 } else {
   echo '<table class="bordered">
         <tr><th>Date</th><th>Type</th><th>Account ID</th><th>IP address</th><th>Additional data</th></tr>';
+  $alt = true;
   foreach ($events as $event) {
-    echo "<tr>
+    $class = $alt ? "class='alt'" : "";
+    echo "<tr $class>
             <td>" . date('Y-m-d, H:i', strtotime($event['date'])) . "</td>
             <td>{$event['type']}</td><td>{$event['account_id']}</td>
             <td>{$event['ip_address']}</td>
             <td>{$event['info']}</td>
           </tr>";
+    $alt = !$alt;
   }
   echo '</table>';
 }
@@ -147,7 +150,7 @@ if ($offset === -1) {
     echo '<li><code>14 23 * * 0 php ' . __DIR__ . '/cron/prune_events.php' . $keyAddition . '</code> to prune events every Sunday at 11:14 PM</li>';
     echo '<li class="manual" style="display: none">Send mails manually: <a href="./cron/send_emails.php?key=' . Configuration::CRON_SECRET . '">Send emails</a></li>';
     echo '<li class="manual" style="display: none">Prune events manually: <a href="./cron/prune_events.php?key=' . Configuration::CRON_SECRET . '">Prune events</a></li>';
-    echo "<li onclick=\"document.querySelectorAll('.manual').forEach(e => e.style.display = 'list-item'); this.style.display = 'none';\"><span class='fakelink'>Open pages manually</span></li>";
+    echo "<li onclick=\"document.querySelectorAll('.manual').forEach(e => e.style.display = 'list-item'); this.style.display = 'none'; return false;\"><a href='#' class='internal'>Open pages manually</a></li>";
     echo '</ul>';
   }
 }
