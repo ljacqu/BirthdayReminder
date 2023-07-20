@@ -74,8 +74,8 @@ if (isset($_POST['email'])) {
 <p>Welcome to the <em>Birthday Reminder</em> setup! Please create a user to administer the system.</p>
 <form method="post">
 <table>
-<tr><td>Email:</td><td><input type="email" name="email" value="admin@example.org" /></td></tr>
-<tr><td>Password:</td><td><input type="password" name="password" value="birthday" minlength="6" /></td></tr>
+<tr><td>Email:</td><td><input type="email" name="email" /></td></tr>
+<tr><td>Password:</td><td><input type="password" name="password" minlength="6" /></td></tr>
 <tr><td><input type="submit" value="Register" /></td></tr>
 </table>
 </form>
