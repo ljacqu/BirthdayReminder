@@ -27,7 +27,7 @@ if (isset($_SESSION['account'])) {
     echo 'Invalid login! Please try again.';
   } else {
     $_SESSION['account'] = $accountId;
-    $_SESSION['login_time'] = time();
+    $_SESSION['last_seen'] = time();
     $_SESSION['session_secret'] = $db->fetchSessionSecret($accountId);
     header('Location: index.php');
     exit;

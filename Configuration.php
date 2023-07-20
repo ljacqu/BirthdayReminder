@@ -71,8 +71,8 @@ class Configuration {
    */
   const CRON_SECRET = 'oKErMTsh2';
 
-  /** After how many seconds does a user have to log back in? (1 day = 24*3600) */
-  const SESSION_TIMEOUT_SECONDS = 2 * 24 * 3600;
+  /** After how many seconds of inactivity does a user have to log back in? (1 day = 24*3600) */
+  const SESSION_TIMEOUT_SECONDS = 24 * 3600;
 
   /** After how many days can an event be pruned by prune_events.php? */
   const EVENTS_KEEP_DAYS = 45;

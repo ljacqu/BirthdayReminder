@@ -60,7 +60,7 @@ class DatabaseConnector {
     $from2020Incl = '2020-' . $fromIncl->format('m-d');
     $to2020Excl   = '2020-' . $toExcl->format('m-d');
 
-    // If we have something like from=2020-12-29, to=2020-01-04, need to use two intervals!
+    // If we have something like from=2020-12-29, to=2020-01-05, need to use two intervals!
     if ($fromIncl->format('m') === '12' && $toExcl->format('m') === '01') {
       // Example:   (date_2020 between '2020-12-29'    and '2020-12-31' OR (date_2020 >= '2020-01-01' and date_2020 < '2020-01-05'))
       $dateQuery = "date_2020 between '$from2020Incl' and '2020-12-31' OR (date_2020 >= '2020-01-01' and date_2020 < '$to2020Excl')";

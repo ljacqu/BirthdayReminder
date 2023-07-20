@@ -11,12 +11,13 @@ final class SessionService {
       return false;
     }
 
-    $sessionCreated = $_SESSION['login_time'];
+    $sessionCreated = $_SESSION['last_seen'];
     if (!$sessionCreated || (time() - $sessionCreated) > Configuration::SESSION_TIMEOUT_SECONDS) {
       session_destroy();
       return false;
     }
 
+    $_SESSION['last_seen'] = time();
     return true;
   }
 }
